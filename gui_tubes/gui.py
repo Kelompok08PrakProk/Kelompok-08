@@ -10,7 +10,7 @@ from email.message import EmailMessage
 from loginregist import register_user, login_user, menuDua
 
 ctk.set_appearance_mode("light")
-ctk.set_default_color_theme("tubes/purple.json") 
+ctk.set_default_color_theme("Kelompok-08/gui_tubes/purple.json") 
 
 def halaman_login():
     window = ctk.CTk()
@@ -41,25 +41,11 @@ def halaman_login():
     l3 = ctk.CTkLabel(frame, text="Login", text_color="#1A1F23", font=('Trebuchet MS', 30))
     l3.place(relx=0.5, rely=0.26, anchor="center")
 
-    entry1 = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Email", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-    entry1.place(relx=0.5, rely=0.42, anchor="center")
+    entry_email = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Email", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+    entry_email.place(relx=0.5, rely=0.42, anchor="center")
 
-    entry2 = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Password", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-    entry2.place(relx=0.5, rely=0.52, anchor="center")
-
-    def login_user():
-        email = entry_email.get()
-        password = entry_password.get()
-        
-        with open('database/databaseUser.csv', mode='r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if row[1] == email and row[2] == password:
-                    print("Login successful")
-                    window.destroy()
-                    menuDua(email)
-                    return
-        print("Invalid email or password")
+    entry_password = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Password", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+    entry_password.place(relx=0.5, rely=0.52, anchor="center")
 
     def halaman_register():
         window.destroy()
@@ -92,26 +78,26 @@ def halaman_login():
         l3 = ctk.CTkLabel(frame, text="Register", text_color="#1A1F23", font=('Trebuchet MS', 30))
         l3.place(relx=0.5, rely=0.23, anchor="center")
 
-        entry1 = ctk.CTkEntry(frame, width=400, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Nama Lengkap", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry1.place(relx=0.5, rely=0.33, anchor="center")
+        entry_nama_lengkap = ctk.CTkEntry(frame, width=400, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Nama Lengkap", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_nama_lengkap.place(relx=0.5, rely=0.33, anchor="center")
 
-        entry2 = ctk.CTkEntry(frame, width=400, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Alamat", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry2.place(relx=0.5, rely=0.41, anchor="center")
+        entry_alamat = ctk.CTkEntry(frame, width=400, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Alamat", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_alamat.place(relx=0.5, rely=0.41, anchor="center")
 
-        entry3 = ctk.CTkEntry(frame, width=400, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="No. HP", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry3.place(relx=0.5, rely=0.49, anchor="center")
+        entry_nomor_hp = ctk.CTkEntry(frame, width=400, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="No. HP", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_nomor_hp.place(relx=0.5, rely=0.49, anchor="center")
 
-        entry4 = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Username", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry4.place(relx=0.268, rely=0.6, anchor="center")
+        entry_username = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Username", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_username.place(relx=0.268, rely=0.6, anchor="center")
 
-        entry5 = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Email", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry5.place(relx=0.268, rely=0.68, anchor="center")
+        entry_email = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Email", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_email.place(relx=0.268, rely=0.68, anchor="center")
 
-        entry6 = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Password", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry6.place(relx=0.732, rely=0.6, anchor="center")
+        entry_password = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Password", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_password.place(relx=0.732, rely=0.6, anchor="center")
 
-        entry7 = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Konfirmasi Password", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
-        entry7.place(relx=0.732, rely=0.68, anchor="center")
+        entry_konfirmasi_password = ctk.CTkEntry(frame, width=170, height=20, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", placeholder_text="Konfirmasi Password", font=('Trebuchet MS', 11), placeholder_text_color="#A6A4A8")
+        entry_konfirmasi_password.place(relx=0.732, rely=0.68, anchor="center")
 
         def register_user():
             username = entry_username.get()
@@ -167,6 +153,21 @@ def halaman_login():
         window2.destroy()
         halaman_login()
 
+    def login_user():
+            email = entry_email.get()
+            password = entry_password.get()
+            
+            # Membaca data pengguna dari file CSV
+            with open('Kelompok-08/gui_tubes/database/databaseUser.csv', mode='r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row[1] == email and row[2] == password:
+                        print("Login successful")
+                        return email  # Mengembalikan email pengguna saat login berhasil
+            
+            print("Invalid email or password")
+            return None  # Mengembalikan None jika login gagal
+            
     button1 = ctk.CTkButton(frame, width=170, height=20, corner_radius=30, fg_color="#A84F6C", border_width=0, text="Login", text_color="White", font=("Trebuchet MS", 11), hover=True, hover_color="#66273B",  command=login_user)
     button1.place(relx=0.5, rely=0.65, anchor="center")
 
