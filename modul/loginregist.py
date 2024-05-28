@@ -4,7 +4,6 @@ import string
 import smtplib
 import datetime
 import qrcode
-import PyPDF2
 import pandas as pd
 from datetime import datetime, timedelta
 from reportlab.lib.pagesizes import letter
@@ -291,7 +290,7 @@ def baca_data_buku():
 def simpan_data_buku(data_buku):
     """Menyimpan data buku ke file databuku.csv"""
     with open('database/databuku.csv', mode='w', encoding='windows-1252', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=["judul", "stok", "pengarang", "tahun"])
+        writer = csv.DictWriter(file, fieldnames=["judul", "genre", "penulis", "tahunTerbit","halaman","sinopsis","stok"])
         writer.writeheader()
         for buku in data_buku:
             writer.writerow(buku)
@@ -446,6 +445,29 @@ def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam,
     
     print(f"Tiket peminjaman telah disimpan sebagai {pdf_filename}")
 
+def kembalikan_buku(user_email, judul_buku):
+    """Mengembalikan buku yang telah dipinjam dan memperbarui stok buku."""
+    # Baca data buku dan data peminjaman
+    data_buku = baca_data_buku()
+    data_pinjam = baca_data_pinjam()
+    buku_ketemu = False
+    # Cari buku yang dikembalikan dan tambah stoknya
+    for buku in data_buku:
+        if buku["judul"] == judul_buku:
+            buku_ketemu = True
+            print("buku judul : ", buku["judul"])
+            print("buku stok : ", buku["stok"])
+            buku["stok"] = int(buku["stok"]) + 1
+            # Hapus catatan peminjaman dari data_pinjam
+            data_pinjam = [pinjam for pinjam in data_pinjam if not (pinjam["email"] == user_email and pinjam["judul"] == judul_buku)]
+
+            # Simpan data buku yang telah diperbarui dan data peminjaman yang telah diperbarui
+            simpan_data_buku(data_buku)
+            simpan_data_pinjam(data_pinjam)
+
+            print(f"Buku '{judul_buku}' berhasil dikembalikan.")
+    if buku_ketemu == False:
+        print(f"Buku '{judul_buku}' tidak ditemukan.")
 def menuDua(user_email):
     while True:
         print("===   Beranda   ===")
@@ -453,20 +475,21 @@ def menuDua(user_email):
         print("2. Kategori")
         print("3. Cari Buku")
         print("4. Profil")
-        print("5. Logout")
-        menu = input("Menu pilihan (1/2/3/4/5): ")
+        print("5. Pengembalian Buku")
+        print("6. Logout")
+        menu = input("Menu pilihan (1/2/3/4/5/6): ")
 
         if menu == '1':
             data_buku = baca_data_buku()
             tampilkan_daftar_buku(data_buku)
 
-      # Memilih buku
+            # Memilih buku
             buku_dipilih = pilih_buku(data_buku)
 
-      # Menampilkan detail buku
+            # Menampilkan detail buku
             tampilkan_detail_buku(buku_dipilih)
 
-      # Konfirmasi peminjaman
+            # Konfirmasi peminjaman
             konfirmasi = input("Apakah Anda ingin meminjam buku ini? (y/n): ")
             if konfirmasi.lower() == 'y':
                 pinjam_buku(user_email, buku_dipilih)
@@ -488,12 +511,13 @@ def menuDua(user_email):
             tampilkan_menu()
         elif menu == '3':
             cari_buku()
-            # Tambahkan fungsi untuk mencari buku di sini
         elif menu == '4':
             print("Profil")
             tampilkan_profil(str(user_email))
-            # Tambahkan fungsi untuk profil di sini
         elif menu == '5':
+            judul_buku = input("Masukkan judul buku yang ingin dikembalikan: ")
+            kembalikan_buku(user_email, judul_buku)
+        elif menu == '6':
             print("Logout berhasil.")
             break
         else:
