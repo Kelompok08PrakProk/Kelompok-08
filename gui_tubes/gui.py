@@ -72,10 +72,10 @@ def halaman_login():
         l1 = ctk.CTkLabel(window2, image=img1, text="")
         l1.pack()
 
-        frame = ctk.CTkFrame(window2, width=500, height=350, corner_radius=4, fg_color="White")
+        frame = ctk.CTkFrame(window2, width=500, height=350, corner_radius=0, fg_color="White")
         frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        l2 = ctk.CTkLabel(window2, image=logo_img, text="", bg_color="transparent", fg_color="transparent")
+        l2 = ctk.CTkLabel(window2, image=logo_img, text="", bg_color="white", fg_color="transparent")
         l2.place(relx=0.5, rely=0.15, anchor="center")
 
         l3 = ctk.CTkLabel(frame, text="Register", text_color="#1A1F23", font=('Trebuchet MS', 30))
