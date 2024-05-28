@@ -10,7 +10,6 @@ from email.message import EmailMessage
 from loginregist import register_user, login_user, menuDua
 
 ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("gui_tubes/purple.json") 
 
 def halaman_login():
     window = ctk.CTk()
