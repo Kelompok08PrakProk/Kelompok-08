@@ -75,7 +75,7 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
         cover_dir = os.path.join(script_dir, 'coverbuku')
         
         # Menghapus widget lama dari scrollable_frame
-        for widget in scrollable_frame.winfo_children():
+        for widget in category_scrollable_frame.winfo_children():
             widget.destroy()
         
         # Menampilkan daftar buku berdasarkan genre
@@ -111,17 +111,19 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
 
-def show_novel_details(novel_image_path, novel_description):
+def show_novel_details(search_results_frame,novel_image_path, novel_description):
     try:
         novel_image = Image.open(novel_image_path)
         resize_novel_img = novel_image.resize((350, 450))
         novel_image = ImageTk.PhotoImage(resize_novel_img)
-        
-        novel_img_label = ctk.CTkLabel(window_beranda, image=novel_image, text="", bg_color="transparent", fg_color="transparent")
+        novel_image_path = (os.path.join(script_dir, "gambar/cover buku/Novel/1.jpg"))
+        novel_description = (os.path.join(script_dir,"Tahun Terbit: 2017\nJumlah Halaman: 379\n\nSinopsis : Laut Bercerita, novel terbaru Leila S. Chudori, bertutur tentang kisah keluarga yang kehilangan, sekumpulan sahabat yang merasakan kekosongan di dada, sekelompok orang yang gemar menyiksa dan lancar berkhianat, sejumlah keluarga yang mencari kejelasan makam anaknya, dan tentang cinta yang tak akan luntur."))
+
+        novel_img_label = ctk.CTkLabel(search_results_frame, image=novel_image, text="", bg_color="transparent", fg_color="transparent")
         novel_img_label.image = novel_image  
         novel_img_label.place(relx=0.25, rely=0.5, anchor="center")
         
-        novel_desc_text = Text(window_beranda, wrap='word', bg='#1A1F23', fg='#E3DFE6', font=("Trebuchet MS", 16), borderwidth=0, highlightthickness=0)
+        novel_desc_text = Text(search_results_frame, wrap='word', bg='#1A1F23', fg='#E3DFE6', font=("Trebuchet MS", 16), borderwidth=0, highlightthickness=0)
         novel_desc_text.insert("1.0", novel_description)
         novel_desc_text.tag_add("justify", "1.0", "end")
         novel_desc_text.tag_configure("justify", justify="left")
@@ -134,14 +136,14 @@ def show_novel_details(novel_image_path, novel_description):
         resize_arrow_img = back_arrow.resize((200, 25))
         back_arrow = ImageTk.PhotoImage(resize_arrow_img)
 
-        back_button = ctk.CTkButton(window_beranda, image=back_arrow, text="Kembali", width=40, height=40, corner_radius=30, fg_color="transparent" , command=back_to_home)
+        back_button = ctk.CTkButton(search_results_frame, image=back_arrow, text="Kembali", width=40, height=40, corner_radius=30, fg_color="transparent" , command=back_to_home)
         back_button.image = back_arrow  
         back_button.place(relx=0.05, rely=0.11, anchor="nw")
 
-        stock_button = ctk.CTkButton(window_beranda, text="Stok : 10", width=50, height=25, corner_radius=30, fg_color="#A84F6C", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
+        stock_button = ctk.CTkButton(search_results_frame, text="Stok : 10", width=50, height=25, corner_radius=30, fg_color="#A84F6C", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
         stock_button.place(relx=0.39, rely=0.7, anchor="center")
         
-        borrow_button = ctk.CTkButton(window_beranda, text="PINJAM", width=120, height=35, corner_radius=30, fg_color="transparent", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
+        borrow_button = ctk.CTkButton(search_results_frame, text="PINJAM", width=120, height=35, corner_radius=30, fg_color="transparent", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
         borrow_button.place(relx=0.4, rely=0.8, anchor="center")
         
     except FileNotFoundError as e:
@@ -178,6 +180,12 @@ def setup_home_screen():
         category_frame.pack_forget()
         main_frame.pack(side=ctk.TOP, fill="both", expand=True)
         tampilkan_daftar_buku(scrollable_frame)
+    
+    def show_result():
+        main_frame.pack_forget()
+        category_frame.pack_forget()
+        search_results_frame.pack(side=ctk.TOP, fill="both", expand=True)
+        show_novel_details(search_results_frame)
 
     def show_kategori():
         indicate(button2_indicate)
@@ -192,10 +200,13 @@ def setup_home_screen():
 
     # Fungsi untuk menampilkan frame akun
     def show_account_frame():
-        acc_frame.tkraise()
+        acc_frame = ctk.CTkFrame(window_beranda, width=300, height=600, fg_color="#1A1F23", corner_radius=30, border_color="#A84F6C")
+        acc_frame.pack(side=ctk.RIGHT, expand=False)
+        acc_frame.pack_propagate(False)
+        acc_frame.lift()
 
         label_acc_icon = ctk.CTkLabel(acc_frame, width=6, height=6, image=icon_acc, corner_radius=0, bg_color="#1A1F23", 
-                        fg_color="#1A1F23", border_width=0, text="") 
+                        fg_color="#1A1F23", text="") 
         label_acc_icon.pack(pady=20)
 
         label_user = ctk.CTkLabel(acc_frame, text="dimas", fg_color="transparent", text_color="#E3DFE6", font=("Trebuchet MS", 18))
@@ -205,11 +216,8 @@ def setup_home_screen():
         button_buku_saya = ctk.CTkButton(acc_frame, text="Buku Saya", fg_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), corner_radius=10)
         button_buku_saya.pack(pady=20)
 
-        acc_frame.pack(side=ctk.RIGHT, expand=False)
-
 
     option_frame = ctk.CTkFrame(window_beranda, fg_color="#1A1F23")
-
     option_frame.pack(side=ctk.TOP)
     option_frame.pack_propagate(False)
     option_frame.configure(width=1300, height=120)
@@ -224,9 +232,9 @@ def setup_home_screen():
     category_frame.pack_propagate(False)
     category_frame.configure(width=1300, height=600)
 
-    acc_frame = ctk.CTkFrame(window_beranda, width=300, height=600, fg_color="#1A1F23", corner_radius=30, border_color="#A84F6C")
-    acc_frame.pack_forget()
-    acc_frame.pack_propagate(False)
+    search_results_mainframe = ctk.CTkFrame(window_beranda, fg_color="#1A1F23")
+    search_results_mainframe.pack_propagate(False)
+    search_results_mainframe.configure(width=1300, height=600) 
 
     l1 = ctk.CTkLabel(window_beranda, image=logo2, text="", bg_color="transparent", fg_color="transparent")
     l1.place(x=10, y=10, anchor="nw")
@@ -251,7 +259,7 @@ def setup_home_screen():
     button2_indicate.place(relx=0.63, rely=0.4, anchor="center")
 
     button3 = ctk.CTkButton(window_beranda, width=20, height=20, image=icon_search, corner_radius=0, bg_color="#9C909D", 
-                            fg_color="#9C909D", border_width=0, text="", hover=False)
+                            fg_color="#9C909D", border_width=0, text="", hover=False, command=show_result)
     button3.place(relx=0.88, rely=0.055, anchor="center")
 
     button4 = ctk.CTkButton(window_beranda, width=6, height=6, image=icon_acc, corner_radius=0, bg_color="#1A1F23", 
@@ -261,12 +269,14 @@ def setup_home_screen():
     scrollable_frame = ctk.CTkScrollableFrame(main_frame, width=1200, height=500, fg_color="#1A1F23", orientation="horizontal")
     scrollable_frame.pack(side="top", fill="both", expand=True)
 
+    search_results_frame = ctk.CTkFrame(search_results_mainframe, width=1300, height=600, fg_color="#1A1F23")
+    scrollable_frame.pack(side="top", fill="both", expand=True)
+
     category_scrollable_frame = ctk.CTkScrollableFrame(category_frame, width=1200, height=500, fg_color="#1A1F23", orientation="horizontal")
     category_scrollable_frame.pack(side="top", fill="both", expand=True)
 
-    show_novel_details(os.path.join(script_dir, "gambar/cover buku/Novel/1.jpg"), 
-                    "Tahun Terbit: 2017\nJumlah Halaman: 379\n\nSinopsis : Laut Bercerita, novel terbaru Leila S. Chudori, bertutur tentang kisah keluarga yang kehilangan, sekumpulan sahabat yang merasakan kekosongan di dada, sekelompok orang yang gemar menyiksa dan lancar berkhianat, sejumlah keluarga yang mencari kejelasan makam anaknya, dan tentang cinta yang tak akan luntur.")
-    
+    show_result()
+
     show_beranda()
     
 window_beranda = ctk.CTk()
