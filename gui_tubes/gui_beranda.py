@@ -10,7 +10,7 @@ import pandas as pd
 from email.message import EmailMessage
 from loginregist import register_user, login_user, menuDua
 
-
+script_dir = os.path.dirname(os.path.abspath(__file__))
 # Fungsi untuk menampilkan daftar buku
 def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
     try:
@@ -23,11 +23,11 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
             return
         
         # Load cover buku dari direktori coverbuku
-        cover_dir = os.path.join(script_dir, 'coverbuku')
+        cover_dir = os.path.join(script_dir, 'cover buku')
         
         # Menampilkan daftar buku
         for idx, row in df.iterrows():
-            cover_path = os.path.join(cover_dir, f"{row['judul']}.jpg")
+            cover_path = os.path.join(cover_dir, f"{row['judul']}.jpeg")
             
             if os.path.exists(cover_path):
                 try:
@@ -153,7 +153,6 @@ def back_to_home():
     setup_home_screen()
 
 def setup_home_screen():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
     logo2_path = os.path.join(script_dir, "gambar/logo2.png")
     icon_search_path = os.path.join(script_dir, "gambar/search_icon.png")
     icon_acc_path = os.path.join(script_dir, "gambar/account_icon.png")
@@ -267,7 +266,9 @@ def setup_home_screen():
 
     show_novel_details(os.path.join(script_dir, "gambar/cover buku/Novel/1.jpg"), 
                     "Tahun Terbit: 2017\nJumlah Halaman: 379\n\nSinopsis : Laut Bercerita, novel terbaru Leila S. Chudori, bertutur tentang kisah keluarga yang kehilangan, sekumpulan sahabat yang merasakan kekosongan di dada, sekelompok orang yang gemar menyiksa dan lancar berkhianat, sejumlah keluarga yang mencari kejelasan makam anaknya, dan tentang cinta yang tak akan luntur.")
-
+    
+    show_beranda()
+    
 window_beranda = ctk.CTk()
 window_beranda.title("Beranda")
 window_beranda.geometry("1300x600")
