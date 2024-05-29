@@ -1,12 +1,13 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
-from tkcalendar import Calendar  # Pastikan Anda sudah menginstall tkcalendar dengan 'pip install tkcalendar'
+from tkcalendar import Calendar
 from datetime import datetime, timedelta
 import qrcode
 import random
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, inch
+
 
 def kembali():
     # Contoh tindakan ketika tombol kembali ditekan
@@ -14,10 +15,11 @@ def kembali():
     window_beranda.destroy()
 
 def show_calendar(button):
-    calendar_window = ctk.CTkToplevel(frame_tanggal_pinjam)
-    calendar_window.geometry("300x300")
-    calendar = Calendar(calendar_window, selectmode='day', date_pattern='dd-mm-yyyy')
-    calendar.pack(pady=10)
+    if button == button_tanggal_pinjam:
+        calendar_window = ctk.CTkToplevel(frame_tanggal_pinjam)
+        calendar_window.geometry("300x300")
+        calendar = Calendar(calendar_window, selectmode='day', date_pattern='dd-mm-yyyy')
+        calendar.pack(pady=10)
 
     def get_date():
         selected_date = calendar.get_date()
@@ -39,6 +41,9 @@ def show_calendar(button):
     calendar_window.lift()
     # Jadikan jendela kalender sebagai jendela utama sementara
     calendar_window.grab_set()
+
+def get_date():
+    pass 
 
 def change_book(book_info):
     cover_buku_path = os.path.join(script_dir, book_info["cover_path"])
