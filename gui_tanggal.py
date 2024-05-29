@@ -18,14 +18,14 @@ def show_calendar(button):
 
     def get_date():
         selected_date = calendar.get_date()
-        select_button.configure(text=selected_date)
-        button_tampilkan_pinjam.configure(text=selected_date)
         
-        # Hitung tanggal pengembalian
-        tanggal_peminjaman = datetime.strptime(selected_date, "%d-%m-%Y")
-        tanggal_pengembalian = tanggal_peminjaman + timedelta(days=7)
-        label_tanggal_kembali.configure(text=tanggal_pengembalian.strftime("%Y-%m-%d"))
-
+        if button == button_tanggal_pinjam:
+            button_tampilkan_pinjam.configure(text=selected_date)
+            tanggal_peminjaman = datetime.datetime.strptime(selected_date, "%d-%m-%Y")
+            tanggal_pengembalian = tanggal_peminjaman + timedelta(days=7)
+            button_tampilkan_kembali.configure(text=tanggal_pengembalian.strftime("%d-%m-%Y"))
+        elif button == button_tanggal_kembali:
+                button_tampilkan_kembali.configure(text=selected_date)
 
         calendar_window.destroy()
 
