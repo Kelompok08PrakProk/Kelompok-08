@@ -41,7 +41,7 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
             frame_buku.pack(side="left", padx=10, pady=10)
 
             # Change label_cover to a button
-            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", command=lambda judul=row['judul'], genre=row['genre'], penulis=row['penulis'], tahun_terbit=row['tahunTerbit'], halaman=row['halaman'], sinopsis=row['sinopsis'], stok=row['stok']: tampilkan_detail_buku(judul, genre, penulis, tahun_terbit, halaman, sinopsis, stok))
+            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", command=lambda buku=row: tampilkan_detail_buku(buku))
             button_cover.image = cover_photo  # Menyimpan referensi gambar
             button_cover.pack(side="top")
 
@@ -108,6 +108,18 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
 
+def tampilkan_detail_buku(buku_dipilih):
+  """Menampilkan detail buku dari kamus buku."""
+  print(f"\n**Detail Buku:**")
+  print(f"Judul: {buku_dipilih['judul']}")
+  print(f"Genre: {buku_dipilih['genre']}")
+  print(f"Penulis: {buku_dipilih['penulis']}")
+  print(f"Tahun Terbit: {buku_dipilih['tahunTerbit']}")
+  print(f"Halaman: {buku_dipilih['halaman']}")
+  print(f"Sinopsis: {buku_dipilih['sinopsis']}")
+  print(f"Stok: {buku_dipilih['stok']}")
+
+
 def setup_home_screen():
     logo2_path = os.path.join(script_dir, "gambar/logo2.png")
     icon_search_path = os.path.join(script_dir, "gambar/search_icon.png")
@@ -122,7 +134,55 @@ def setup_home_screen():
     icon_acc = Image.open(icon_acc_path)
     resize_img = icon_acc.resize((70,70))
     icon_acc = ImageTk.PhotoImage(resize_img)
-        
+
+    def search_button_click():
+        judul_dicari = entry1.get().lower().strip()
+        try:
+            # Lakukan pencarian buku
+            search_results = cari_buku(judul_dicari)
+            # Tampilkan hasil pencarian
+            show_result(search_results)
+        except Exception as e:
+            print(f"Terjadi kesalahan: {e}")
+    
+    def cari_buku(file_path='database/databuku.csv'):
+        judul_dicari = entry1.get().lower().strip()
+        try:
+            # Membaca file CSV
+            df = pd.read_csv(file_path, encoding="windows-1252")
+            
+            # Filter buku berdasarkan judul
+            buku_ditemukan = df[df['judul'].str.lower().str.contains(judul_dicari)]
+            
+            if buku_ditemukan.empty:
+                print(f"Tidak ada buku dengan judul yang mengandung '{judul_dicari}' ditemukan.")
+            else:
+                print(f"Buku yang ditemukan dengan judul yang mengandung '{judul_dicari}':")
+                for index, row in buku_ditemukan.iterrows():
+                    print(f"Judul: {row['judul']}, Penulis: {row['penulis']}, Tahun Terbit: {row['tahunTerbit']}, Halaman: {row['halaman']}")
+                    print(f"Sinopsis: {row['sinopsis']}\n")
+                    
+        except FileNotFoundError:
+            print(f"File {file_path} tidak ditemukan.")
+        except Exception as e:
+            print(f"Terjadi kesalahan: {e}")
+
+
+    def show_result(judul_dicari):
+        search_results = cari_buku(judul_dicari)
+        search_results_frame = ctk.CTkFrame(window_beranda, width=1200, height=700, fg_color="#1A1F23")
+        search_results_frame.pack(pady=20)
+
+        if search_results is not None and not search_results.empty:
+            for idx, row in search_results.iterrows():
+                book_image_path = os.path.join(script_dir, "cover buku", f"{row['judul']}.jpeg")
+                book_description = row['sinopsis']
+                show_book_details(search_results_frame, book_image_path, book_description)
+                break
+        else:
+            no_result_label = ctk.CTkLabel(search_results_frame, text="Buku tidak ditemukan.", fg_color="transparent", text_color="#E3DFE6", font=("Trebuchet MS", 16))
+            no_result_label.place(relx=0.5, rely=0.5, anchor="center")
+
     def indicate(label):
         button1_indicate.configure(fg_color="#1A1F23")
         button2_indicate.configure(fg_color="#1A1F23")
@@ -187,7 +247,9 @@ def setup_home_screen():
     l1 = ctk.CTkLabel(window_beranda, image=logo2, text="", bg_color="transparent", fg_color="transparent")
     l1.place(x=10, y=10, anchor="nw")
 
-    entry1 = ctk.CTkEntry(window_beranda, width=220, height=35, corner_radius=30, fg_color="#9C909D", border_width=0, text_color="#1A1F23", placeholder_text="Search", font=('Trebuchet MS', 16), placeholder_text_color="#E3DFE6")
+    entry1 = ctk.CTkEntry(window_beranda, width=220, height=35, corner_radius=30, fg_color="#9C909D", 
+                       border_width=0, text_color="#1A1F23", placeholder_text="Search", 
+                       font=('Trebuchet MS', 16), placeholder_text_color="#E3DFE6")
     entry1.place(relx=0.81, rely=0.055, anchor="center")
 
     button1 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=0, fg_color="#1A1F23", 
@@ -206,8 +268,9 @@ def setup_home_screen():
     button2_indicate = ctk.CTkLabel(option_frame, width=120, height=1, corner_radius=30, text="", bg_color="#1A1F23", fg_color="#1A1F23")
     button2_indicate.place(relx=0.63, rely=0.4, anchor="center")
 
-    button3 = ctk.CTkButton(window_beranda, width=20, height=20, image=icon_search, corner_radius=0, bg_color="#9C909D", 
-                            fg_color="#9C909D", border_width=0, text="", hover=False)
+    button3 = ctk.CTkButton(window_beranda, width=20, height=20, image=icon_search, corner_radius=0, 
+                        bg_color="#9C909D", fg_color="#9C909D", border_width=0, text="", 
+                        hover=False, command=search_button_click)
     button3.place(relx=0.88, rely=0.055, anchor="center")
 
     button4 = ctk.CTkButton(window_beranda, width=6, height=6, image=icon_acc, corner_radius=0, bg_color="#1A1F23", 
@@ -233,6 +296,5 @@ window_beranda.resizable(True,True)
 
 # Tampilkan daftar buku di scrollable frame
 setup_home_screen()
-
 
 window_beranda.mainloop()
