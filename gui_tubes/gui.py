@@ -158,7 +158,7 @@ def halaman_login():
             if user_otp != otp:
                 error_otp.configure(text="Kode OTP tidak sesuai. Coba lagi!")
             else:
-                with open('database/databaseUser.csv', mode='a', newline='') as file:
+                with open("database\databaseUser.csv", mode='a', newline='') as file:
                     writer = csv.writer(file)
                     writer.writerow([username, user_email, password1, namalengkap, alamat, nomorHP])
                 
