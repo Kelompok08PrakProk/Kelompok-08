@@ -3,7 +3,10 @@ from PIL import Image, ImageTk
 import os
 from tkcalendar import Calendar  # Pastikan Anda sudah menginstall tkcalendar dengan 'pip install tkcalendar'
 from datetime import datetime, timedelta
-import datetime
+import qrcode
+import random
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, inch
 
 def kembali():
     # Contoh tindakan ketika tombol kembali ditekan
@@ -21,21 +24,19 @@ def show_calendar(button):
         
         if button == button_tanggal_pinjam:
             button_tampilkan_pinjam.configure(text=selected_date)
-            tanggal_peminjaman = datetime.datetime.strptime(selected_date, "%d-%m-%Y")
+            tanggal_peminjaman = datetime.strptime(selected_date, "%d-%m-%Y")
             tanggal_pengembalian = tanggal_peminjaman + timedelta(days=7)
             button_tampilkan_kembali.configure(text=tanggal_pengembalian.strftime("%d-%m-%Y"))
         elif button == button_tanggal_kembali:
-                button_tampilkan_kembali.configure(text=selected_date)
+            button_tampilkan_kembali.configure(text=selected_date)
 
         calendar_window.destroy()
 
     select_button = ctk.CTkButton(calendar_window, text="Select Date", command=get_date)
     select_button.pack(pady=10)
 
-
-# Angkat jendela kalender ke depan
+    # Angkat jendela kalender ke depan
     calendar_window.lift()
-
     # Jadikan jendela kalender sebagai jendela utama sementara
     calendar_window.grab_set()
 
@@ -48,6 +49,63 @@ def change_book(book_info):
 def pinjam_buku(book_info):
     print(f"Buku '{book_info['title']}' dipinjam!")
     # Tambahkan logika peminjaman buku di sini
+
+def read_user_data(user_email):
+    # Fungsi ini harus mengakses database dan mengambil nama lengkap pengguna berdasarkan email
+    # Untuk contoh ini, kita akan mengembalikan nama statis
+    return "Nama Pengguna"
+
+def generate_random_code():
+    return ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=10))
+
+def generate_qr_code(data, filename):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill='black', back_color='white')
+    img.save(filename)
+
+def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam, tanggal_kembali):
+    """Membuat tiket peminjaman buku dalam bentuk PDF."""
+    # Membaca nama lengkap pengguna dari database
+    nama_lengkap = read_user_data(user_email)
+    if not nama_lengkap:
+        print(f"Pengguna dengan email {user_email} tidak ditemukan.")
+        return
+    
+    # Menghasilkan kode random dan QR code
+    random_code = generate_random_code()
+    qr_filename = f"{random_code}.png"
+    generate_qr_code(random_code, qr_filename)
+    
+    # Membuat PDF
+    pdf_filename = f"tiket_peminjaman_{random_code}.pdf"
+    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    width, height = letter
+
+    # Menambahkan teks ke PDF
+    c.drawString(100, 750, f"Tiket Peminjaman Buku")
+    c.drawString(100, 735, f"Nama Lengkap: {nama_lengkap}")
+    c.drawString(100, 720, f"Judul Buku: {buku_dipilih}")
+    c.drawString(100, 705, f"Genre: {genre}")
+    c.drawString(100, 690, f"Penulis: {penulis}")
+    c.drawString(100, 675, f"Tanggal Peminjaman: {tanggal_pinjam}")
+    c.drawString(100, 660, f"Tanggal Pengembalian: {tanggal_kembali}")
+    c.drawString(100, 645, f"Kode Tiket: {random_code}")
+
+    # Menambahkan QR code ke PDF
+    c.drawImage(qr_filename, 100, 500, width=1.5*inch, height=1.5*inch)
+    
+    # Menyelesaikan PDF
+    c.showPage()
+    c.save()
+    
+    print(f"Tiket peminjaman telah disimpan sebagai {pdf_filename}")
 
 # Data buku
 books = [
@@ -126,7 +184,6 @@ button_tampilkan_pinjam = ctk.CTkButton(window_beranda, width=150, height=40, co
 button_tampilkan_pinjam.place(relx=0.4, rely=0.55, anchor="center")
 button_tanggal_pinjam.configure(command=lambda: show_calendar(button_tanggal_pinjam))
 
-
 frame_tanggal_kembali = ctk.CTkFrame(window_beranda, width=500, height=60, corner_radius=10, fg_color="#e3dfe6")
 frame_tanggal_kembali.place(relx=0.3, rely=0.65, anchor="center")
 
@@ -144,9 +201,21 @@ button_tanggal_kembali.configure(command=lambda: show_calendar(button_tanggal_ke
 label_tanggal_kembali = ctk.CTkLabel(window_beranda, text="", font=("Trebuchet MS", 16), bg_color="#e3dfe6", fg_color="#000000")
 label_tanggal_kembali.place(relx=0.6, rely=0.55, anchor="center")
 
+def cetak_tiket():
+    user_email = "user@example.com"  # Ganti dengan email pengguna yang sebenarnya
+    buku_dipilih = judul_buku_label.cget("text")
+    genre = "Novel"  # Ganti dengan genre yang sesuai
+    penulis = "Penulis Buku"  # Ganti dengan nama penulis yang sesuai
+    tanggal_pinjam = button_tampilkan_pinjam.cget("text")
+    tanggal_kembali = button_tampilkan_kembali.cget("text")
+    
+    if tanggal_pinjam and tanggal_kembali:
+        create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam, tanggal_kembali)
+    else:
+        print("Harap pilih tanggal peminjaman dan tanggal pengembalian.")
 
 # Membuat tombol "Cetak"
-button_cetak = ctk.CTkButton(window_beranda, width=200, height=50, corner_radius=10, fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="CETAK", text_color="#E3DFE6", font=("Trebuchet MS", 20), hover=True, hover_color="#A84F6C")
+button_cetak = ctk.CTkButton(window_beranda, width=200, height=50, corner_radius=10, fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="CETAK", text_color="#E3DFE6", font=("Trebuchet MS", 20), hover=True, hover_color="#A84F6C", command=cetak_tiket)
 button_cetak.place(relx=0.3, rely=0.8, anchor="center")
 
 # Menampilkan gambar sampul buku
