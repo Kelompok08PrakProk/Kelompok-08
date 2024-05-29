@@ -70,7 +70,7 @@ l1.pack(pady=0, anchor="nw")
 
 # Background covernya
 background_cover = ctk.CTkLabel(window_beranda, image=background_cover, text="", bg_color="transparent", fg_color="transparent")
-background_cover.place(relx=0.5, rely=0.32, anchor="center")
+background_cover.place(relx=0.5, rely=0.36, anchor="center")
 
 # Membuat tombol "Beranda"
 button1 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=30, fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="Beranda", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, hover_color="#A84F6C")
