@@ -39,6 +39,23 @@ def show_calendar(button):
     # Jadikan jendela kalender sebagai jendela utama sementara
     calendar_window.grab_set()
 
+def change_book(book_info):
+    cover_buku_path = os.path.join(script_dir, book_info["cover_path"])
+    cover_buku = ctk.CTkImage(light_image=Image.open(cover_buku_path), size=(250, 350))
+    cover_buku_label.configure(image=cover_buku)
+    judul_buku_label.configure(text=book_info["title"])
+
+def pinjam_buku(book_info):
+    print(f"Buku '{book_info['title']}' dipinjam!")
+    # Tambahkan logika peminjaman buku di sini
+
+# Data buku
+books = [
+    {"title": "Laut Bercerita", "cover_path": "gambar/cover buku/Novel/1.jpg"},
+    {"title": "Buku Kedua", "cover_path": "gambar/cover buku/Novel/2.jpg"},
+    # Tambahkan buku lain di sini
+]
+
 # Membuat jendela utama
 window_beranda = ctk.CTk()
 window_beranda.title("Beranda")
@@ -92,10 +109,10 @@ button3.place(relx=0.867, rely=0.055, anchor="center")
 button4 = ctk.CTkButton(window_beranda, width=70, height=70, image=icon_acc, corner_radius=0, bg_color="#1A1F23", fg_color="#1A1F23", border_width=0, text="", hover=True, hover_color="#232A30")
 button4.place(relx=0.95, rely=0.055, anchor="center")
 
-# Membuat tombol "Kembali"
-button_back = ctk.CTkButton(window_beranda, width=100, height=35, corner_radius=0, fg_color="#1A1F23", border_width=0, border_color="#A84F6C", text="← Kembali", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, hover_color="#A84F6C", command=kembali)
-button_back.place(relx=0.08, rely=0.15, anchor="w")
 
+# Membuat tombol "Kembali"
+button_back = ctk.CTkButton(window_beranda, width=100, height=35, corner_radius=0, fg_color="#1A1F23", border_width=0, border_color="", text="← Kembali", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=False, command=kembali)
+button_back.place(relx=0.08, rely=0.16, anchor="w")
 frame_tanggal_pinjam = ctk.CTkFrame(window_beranda, width=500, height=60, corner_radius=10, fg_color="#e3dfe6")
 frame_tanggal_pinjam.place(relx=0.3, rely=0.55, anchor="center")
 
