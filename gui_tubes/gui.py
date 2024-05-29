@@ -158,7 +158,7 @@ def halaman_login():
             if user_otp != otp:
                 error_otp.configure(text="Kode OTP tidak sesuai. Coba lagi!")
             else:
-                with open('gui_tubes/database/databaseUser.csv', mode='a', newline='') as file:
+                with open('database/databaseUser.csv', mode='a', newline='') as file:
                     writer = csv.writer(file)
                     writer.writerow([username, user_email, password1, namalengkap, alamat, nomorHP])
                 
@@ -194,16 +194,22 @@ def halaman_login():
 
         window4.mainloop()
 
-    def send_otp(email, otp):
+    def send_otp(to_mail, otp):
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        
+        from_mail = "petibyunsofficial@gmail.com"
+        server.login(from_mail, "johl erdn chfr jdgq")
+        
         msg = EmailMessage()
-        msg['Subject'] = 'OTP Verification'
-        msg['From'] = 'your-email@gmail.com'
-        msg['To'] = email
-        msg.set_content(f'Your OTP is {otp}')
-    
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login('your-email@gmail.com', 'your-email-password')
-            smtp.send_message(msg)
+        msg["Subject"] = "Your OTP Code for PETI"
+        msg["From"] = from_mail
+        msg["To"] = to_mail
+        msg.set_content("Hello, Your PETI OTP verification code is " + otp)
+        
+        server.send_message(msg)
+        server.quit()
+        print("Email sent")
 
     def back_login():
         window2.destroy()
@@ -214,7 +220,7 @@ def halaman_login():
             password = entry_password.get()
             
             # Membaca data pengguna dari file CSV
-            with open('gui_tubes/database/databaseUser.csv', mode='r') as file:
+            with open('database/databaseUser.csv', mode='r') as file:
                 reader = csv.reader(file)
                 for row in reader:
                     if row[1] == email and row[2] == password:
