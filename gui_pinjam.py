@@ -14,74 +14,89 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 
 def tampilkan_detail_buku(buku_dipilih, df):
     try:
-        if 'cover' not in df.columns:
+        if 'background' not in df.columns or 'cover' not in df.columns:
             print("Kolom 'cover' tidak ditemukan dalam file CSV.")
             return
         
         cover_path = buku_dipilih['cover']
+        background_path = buku_dipilih['background']
         if os.path.exists(cover_path):
             try:
                 cover_image = Image.open(cover_path)
                 cover_image = cover_image.resize((350, 450))
                 cover_photo = ImageTk.PhotoImage(cover_image)
-                
+            
+
             except Exception as e:
                 print(f"Error loading image {cover_path}: {e}")
                 cover_photo = ImageTk.PhotoImage(Image.new("RGB", (350, 450), color="red"))  # Placeholder merah jika ada error
         else:
             print(f"Cover image not found: {cover_path}")
             cover_photo = ImageTk.PhotoImage(Image.new("RGB", (350, 450), color="gray"))  # Placeholder abu-abu jika tidak ditemukan
+        if os.path.exists(background_path):
+            try:
+                background_image = Image.open(background_path)
+                bg_photo = ImageTk.PhotoImage(background_image)
+            
+
+            except Exception as e:
+                print(f"Error loading image {background_path}: {e}")
+                bg_photo = ImageTk.PhotoImage(Image.new("RGB", (350, 450), color="red"))  # Placeholder merah jika ada error
+        else:
+            print(f"Cover image not found: {background_path}")
+            bg_photo = ImageTk.PhotoImage(Image.new("RGB", (350, 450), color="gray"))  # Placeholder abu-abu jika tidak ditemukan    
     
+        main_frame.pack_forget()
+        category_frame.pack_forget()
 
-        novel_img_frame = ctk.CTkFrame(window_beranda, width=350, height=450, fg_color="red")
-        novel_img_frame.place(relx=0.4, rely=0.5, anchor="e")
+        # Show detail_buku_frame
+        global detail_buku_frame
+        detail_buku_frame = ctk.CTkFrame(window_beranda, width=1200, height=600, fg_color="#1A1F23")
+        detail_buku_frame.pack(side="top", fill="both", expand=True)
 
-        novel_img_label = ctk.CTkLabel(novel_img_frame, image=cover_photo, text="")
-        novel_img_label.place(relx=0.5, rely=0.5, anchor="center")
-        
-        book_desc_frame = ctk.CTkFrame(window_beranda, width=800, height=600, bg_color="#1A1F23", fg_color="green")
-        book_desc_frame.place(relx=0.7, rely=0.6, anchor="center")
+        bg_img_label = ctk.CTkLabel(detail_buku_frame, image=bg_photo, text="")
+        bg_img_label.place(relx=0.5, rely=0.15, anchor="center")
 
-        label_judul = ctk.CTkLabel(book_desc_frame, text=f"Judul: {buku_dipilih['judul']}", font=("Arial", 12), wrapline=300)
-        label_judul.configure("justify", justify="left")
-        label_judul.pack(pady=5)
+        cover_img_label = ctk.CTkLabel(detail_buku_frame, image=cover_photo, text="")
+        cover_img_label.place(relx=0.15, rely=0.5, anchor="center")
         
-        label_genre = ctk.CTkLabel(book_desc_frame, text=f"Genre: {buku_dipilih['genre']}", font=("Arial", 12), wrapline=300)
-        label_genre.configure("justify", justify="left")
-        label_genre.pack(pady=5)
-        
-        label_penulis = ctk.CTkLabel(book_desc_frame, text=f"Penulis: {buku_dipilih['penulis']}", font=("Arial", 12), wrapline=300)
-        label_penulis.configure("justify", justify="left")
-        label_penulis.pack(pady=5)
-        
-        label_tahun = ctk.CTkLabel(book_desc_frame, text=f"Tahun Terbit: {buku_dipilih['tahunTerbit']}", font=("Arial", 12), wrapline=300)
-        label_tahun.configure("justify", justify="left")
-        label_tahun.pack(pady=5)
-        
-        label_halaman = ctk.CTkLabel(book_desc_frame, text=f"Halaman: {buku_dipilih['halaman']}", font=("Arial", 12), wrapline=300)
-        label_halaman.configure("justify", justify="left")
-        label_halaman.pack(pady=5)
-        
-        label_sinopsis = ctk.CTkLabel(book_desc_frame, text=f"Sinopsis: {buku_dipilih['sinopsis']}", font=("Arial", 12), wrapline=300)
+        book_desc_frame = ctk.CTkFrame(detail_buku_frame, width=400, height=400, bg_color="#1A1F23", fg_color="#1A1F23")
+        book_desc_frame.place(relx=0.58, rely=0.7  , anchor="center")
+
+        label_genre = ctk.CTkLabel(book_desc_frame, text=f"Genre: {buku_dipilih['genre']}", font=("Trebuchet MS", 16))
+        label_genre.pack(side="top", anchor="w", pady=1, padx=10)
+
+        label_judul = ctk.CTkLabel(book_desc_frame, text=f"Judul: {buku_dipilih['judul']}", font=("Trebuchet MS", 20))
+        label_judul.pack(side="top", anchor="w", pady=1, padx=10)
+
+        label_penulis = ctk.CTkLabel(book_desc_frame, text=f"Penulis: {buku_dipilih['penulis']}", font=("Trebuchet MS", 12))
+        label_penulis.pack(side="top", anchor="w", pady=1, padx=10)
+
+        label_tahun = ctk.CTkLabel(book_desc_frame, text=f"Tahun Terbit: {buku_dipilih['tahunTerbit']}", font=("Trebuchet MS", 12))
+        label_tahun.pack(side="top", anchor="w", pady=5, padx=10)
+
+        label_halaman = ctk.CTkLabel(book_desc_frame, text=f"Halaman: {buku_dipilih['halaman']}", font=("Trebuchet MS", 12))
+        label_halaman.pack(side="top", anchor="w", pady=5, padx=10)
+
+        label_sinopsis = ctk.CTkLabel(book_desc_frame, text=f"Sinopsis: {buku_dipilih['sinopsis']}", font=("Trebuchet MS", 12), wraplength=800)
         label_sinopsis.configure("justify", justify="left")
-        label_sinopsis.pack(pady=5)
-        
-        label_stok = ctk.CTkLabel(book_desc_frame, text=f"Stok: {buku_dipilih['stok']}", font=("Arial", 12))
-        label_stok.configure("justify", justify="left")
-        label_stok.pack(pady=5)
+        label_sinopsis.pack(side="top", anchor="w", pady=5, padx=10)
+    
+        label_stok = ctk.CTkLabel(book_desc_frame, text=f"Stok: {buku_dipilih['stok']}", font=("Trebuchet MS", 16))
+        label_stok.pack(side="top", anchor="w", pady=5, padx=10)
 
-        button_back = ctk.CTkButton(window_beranda, width=100, height=35, corner_radius=0, fg_color="#1A1F23", border_width=0, text="← Kembali", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=False, command=back_to_home)
-        button_back.place(relx=0.08, rely=0.16, anchor="w")
+        button_back = ctk.CTkButton(detail_buku_frame, width=100, height=35, corner_radius=0, fg_color="#1A1F23", border_width=0, text="← Kembali", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=False, command=back_to_home)
+        button_back.pack(side="top", anchor="w", pady=5, padx=10)
         
         global stock_button
-        stock_button = ctk.CTkButton(window_beranda, text=f"Stok : {stok}", width=50, height=25, corner_radius=30, fg_color="#A84F6C", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), state=DISABLED)
+        stock_button = ctk.CTkButton(detail_buku_frame, text=f"Stok : {stok}", width=50, height=25, corner_radius=30, fg_color="#A84F6C", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), state=DISABLED)
         stock_button.place(relx=0.39, rely=0.7, anchor="w")
         
-        borrow_button = ctk.CTkButton(window_beranda, text="PINJAM", width=120, height=35, corner_radius=30, fg_color="transparent", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), command=pinjam_buku)
-        borrow_button.place(relx=0.4, rely=0.8, anchor="w")
+        borrow_button = ctk.CTkButton(detail_buku_frame, text="PINJAM", width=120, height=35, corner_radius=30, fg_color="green", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), command=pinjam_buku)
+        borrow_button.place(relx=0.4, rely=0.5, anchor="center")
         
     except FileNotFoundError as e:
-        messagebox.showerror("File Not Found", f"Error: {e}")
+        print("File Not Found", f"Error: {e}")
 
 def pinjam_buku(user_email, buku_dipilih):
     """Mencatat data peminjaman buku ke database datapinjam.csv."""
@@ -127,6 +142,7 @@ def pinjam_buku(user_email, buku_dipilih):
     print(f"Tanggal pinjam: {tanggal_pinjam.strftime('%Y-%m-%d')}")
     print(f"Tanggal kembali: {tanggal_kembali.strftime('%Y-%m-%d')}")
 
+
 # Fungsi untuk menampilkan daftar buku
 def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
     try:
@@ -153,6 +169,7 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
             else:
                 print(f"Cover image not found: {cover_path}")
                 cover_photo = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="gray"))  # Placeholder abu-abu jika gambar tidak ditemukan
+            
             frame_buku = ctk.CTkFrame(scrollable_frame, width=360, height=600, fg_color="#1A1F23")
             frame_buku.pack(side="left", padx=10, pady=10)
 
@@ -273,22 +290,6 @@ def setup_home_screen():
         except Exception as e:
             print(f"Terjadi kesalahan: {e}")
 
-
-    def show_result(judul_dicari):
-        search_results = cari_buku(judul_dicari)
-        search_results_frame = ctk.CTkFrame(window_beranda, width=1200, height=700, fg_color="#1A1F23")
-        search_results_frame.pack(pady=20)
-
-        if search_results is not None and not search_results.empty:
-            for idx, row in search_results.iterrows():
-                book_image_path = os.path.join(script_dir, "cover buku", f"{row['judul']}.jpeg")
-                book_description = row['sinopsis']
-                show_book_details(search_results_frame, book_image_path, book_description)
-                break
-        else:
-            no_result_label = ctk.CTkLabel(search_results_frame, text="Buku tidak ditemukan.", fg_color="transparent", text_color="#E3DFE6", font=("Trebuchet MS", 16))
-            no_result_label.place(relx=0.5, rely=0.5, anchor="center")
-
     def indicate(label):
         button1_indicate.configure(fg_color="#1A1F23")
         button2_indicate.configure(fg_color="#1A1F23")
@@ -348,19 +349,18 @@ def setup_home_screen():
     option_frame.pack_propagate(False)
     option_frame.configure(width=1300, height=120)
 
+    global main_frame
     main_frame = ctk.CTkFrame(window_beranda, fg_color="#1A1F23")
     main_frame.pack(side=ctk.TOP, fill="both", expand=True)
     main_frame.pack_propagate(False)
     main_frame.configure(width=1300, height=600) 
 
+    global category_frame
     category_frame = ctk.CTkFrame(window_beranda, fg_color="#1A1F23")
     category_frame.pack_forget()
     category_frame.pack_propagate(False)
     category_frame.configure(width=1300, height=600)
 
-    search_results_mainframe = ctk.CTkFrame(window_beranda, fg_color="#1A1F23")
-    search_results_mainframe.pack_propagate(False)
-    search_results_mainframe.configure(width=1300, height=600) 
 
     l1 = ctk.CTkLabel(window_beranda, image=logo2, text="", bg_color="transparent", fg_color="transparent")
     l1.place(x=10, y=10, anchor="nw")
@@ -397,10 +397,7 @@ def setup_home_screen():
 
     scrollable_frame = ctk.CTkScrollableFrame(main_frame, width=1200, height=500, fg_color="#1A1F23", orientation="horizontal")
     scrollable_frame.pack(side="top", fill="both", expand=True)
-
-    search_results_frame = ctk.CTkFrame(search_results_mainframe, width=1300, height=600, fg_color="#1A1F23")
-    scrollable_frame.pack(side="top", fill="both", expand=True)
-
+    
     category_scrollable_frame = ctk.CTkScrollableFrame(category_frame, width=1200, height=500, fg_color="#1A1F23", orientation="vertical")
     category_scrollable_frame.pack(side="top", fill="both", expand=True)
 
