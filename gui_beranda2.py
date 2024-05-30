@@ -12,9 +12,14 @@ from loginregist import register_user, login_user, menuDua
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Fungsi untuk menampilkan daftar buku
+
+last_clicked_button = None
+
+
 def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
     try:
         # Membaca file CSV ke dalam DataFrame
+        global df
         df = pd.read_csv(file_path, encoding="windows-1252")
         
         # Memeriksa apakah kolom 'judul' dan 'cover' ada dalam DataFrame
@@ -37,11 +42,13 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
             else:
                 print(f"Cover image not found: {cover_path}")
                 cover_photo = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="gray"))  # Placeholder abu-abu jika gambar tidak ditemukan
+            
             frame_buku = ctk.CTkFrame(scrollable_frame, width=360, height=600, fg_color="#1A1F23")
             frame_buku.pack(side="left", padx=10, pady=10)
 
-            # Change label_cover to a button
-            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", command=lambda buku=row: tampilkan_detail_buku(buku))
+            # Mengubah tombol cover menjadi tombol yang dapat diklik
+            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", 
+                                         command=lambda buku=row, btn=frame_buku: on_button_click(buku, btn))
             button_cover.image = cover_photo  # Menyimpan referensi gambar
             button_cover.pack(side="top")
 
@@ -54,6 +61,20 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
         print(f"File '{file_path}' kosong atau tidak dapat dibaca.")
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
+
+def on_button_click(buku, button):
+    global last_clicked_button
+
+    # Kembalikan ukuran tombol sebelumnya jika ada
+    if last_clicked_button is not None:
+        last_clicked_button.pack_configure(ipadx=0, ipady=0)
+
+    # Simpan referensi tombol yang baru diklik dan ubah ukurannya
+    last_clicked_button = button
+    button.pack_configure(ipadx=30, ipady=30)
+
+    # Tampilkan detail buku
+    tampilkan_detail_buku(buku)
 
 # Fungsi untuk menampilkan daftar buku berdasarkan genre yang dipilih
 def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path='database/databuku.csv'):
@@ -110,22 +131,53 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
 
+
+# Variabel global untuk menyimpan info_frame
+current_info_frame = None
+
 def tampilkan_detail_buku(buku_dipilih):
-  """Menampilkan detail buku dari kamus buku."""
-  print(f"\n**Detail Buku:**")
-  print(f"Judul: {buku_dipilih['judul']}")
-  print(f"Genre: {buku_dipilih['genre']}")
-  print(f"Penulis: {buku_dipilih['penulis']}")
-  print(f"Tahun Terbit: {buku_dipilih['tahunTerbit']}")
-  print(f"Halaman: {buku_dipilih['halaman']}")
-  print(f"Sinopsis: {buku_dipilih['sinopsis']}")
-  print(f"Stok: {buku_dipilih['stok']}")
+    global current_info_frame
+    
+    # Hapus frame lama jika ada
+    if current_info_frame is not None:
+        current_info_frame.destroy()
+
+    # Membuat frame baru untuk menampilkan detail buku
+    current_info_frame = ctk.CTkFrame(window_beranda, width=1920, height=980, fg_color="#66273B")
+    current_info_frame.pack(expand=True, fill='both', pady=(0, 20))
+
+    # Headline
+    headline = ctk.CTkLabel(current_info_frame, text=f"Judul: {buku_dipilih['judul']}", font=("Trebuchet MS", 36), fg_color="transparent", text_color="#FFFFFF")
+    headline.pack(pady=(20, 10))
+
+    # Sub Headline
+    sub_headline = ctk.CTkLabel(current_info_frame, text=f"Genre: {buku_dipilih['genre']}", font=("Trebuchet MS", 24), fg_color="transparent", text_color="#DDDDDD")
+    sub_headline.pack(pady=(0, 20))
+
+    # Deskripsi
+    deskripsi = ctk.CTkLabel(current_info_frame, text=f"Sinopsis: {buku_dipilih['sinopsis'][:100]}...", 
+                             font=("Trebuchet MS", 16), fg_color="transparent", text_color="#BBBBBB", wraplength=1800, justify="center")
+    deskripsi.pack(pady=(0, 40))
+
+    book_button = ctk.CTkButton(current_info_frame, text='Pinjam', width=20, height=2, corner_radius=10, fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, hover_color="#A84F6C", command=lambda x:pinjam())
+    book_button.pack(pady=(20, 10))
+
+    # Menampilkan detail buku di konsol (jika diperlukan)
+    print(f"\n**Detail Buku:**")
+    print(f"Judul: {buku_dipilih['judul']}")
+    print(f"Genre: {buku_dipilih['genre']}")
+    print(f"Penulis: {buku_dipilih['penulis']}")
+    print(f"Tahun Terbit: {buku_dipilih['tahunTerbit']}")
+    print(f"Halaman: {buku_dipilih['halaman']}")
+    print(f"Sinopsis: {buku_dipilih['sinopsis']}")
+    print(f"Stok: {buku_dipilih['stok']}")
+
 
 
 def setup_home_screen():
     logo2_path = os.path.join(script_dir, "gambar/logo2.png")
     icon_search_path = os.path.join(script_dir, "gambar/search_icon.png")
-    icon_acc_path = os.path.join(script_dir, "gambar/logout.png")
+    icon_acc_path = os.path.join(script_dir, "gambar/account_icon.png")
 
     logo2 = Image.open(logo2_path)
     resize_img = logo2.resize((320,117))
@@ -188,7 +240,6 @@ def setup_home_screen():
     def indicate(label):
         button1_indicate.configure(fg_color="#1A1F23")
         button2_indicate.configure(fg_color="#1A1F23")
-        button3_indicate.configure(fg_color="#1A1F23")
         # Highlight the selected indicator
         label.configure(fg_color="#A84F6C")
         
@@ -201,6 +252,8 @@ def setup_home_screen():
     def show_kategori():
         indicate(button2_indicate)
         main_frame.pack_forget()
+        if current_info_frame is not None:
+            current_info_frame.destroy()
         category_frame.pack(side=ctk.TOP, fill="both", expand=True)
         
         for widget in category_frame.winfo_children():
@@ -222,22 +275,45 @@ def setup_home_screen():
         option_menu.place(relx=0.1, rely=0.02, anchor="n")
 
     # Fungsi untuk menampilkan frame akun
+    global acc_frame_visible, acc_frame
+    acc_frame_visible = False
+    acc_frame = None  # Define acc_frame globally
+
+    def toggle_account_frame():
+        global acc_frame_visible
+        if not acc_frame_visible:
+            show_account_frame()
+            acc_frame_visible = True
+            print(acc_frame_visible)
+        else:
+            acc_frame.pack()
+            acc_frame.pack_forget()
+            acc_frame_visible = False
+            print(acc_frame_visible)
+
     def show_account_frame():
-        acc_frame = ctk.CTkFrame(window_beranda, width=300, height=600, fg_color="#1A1F23", corner_radius=30, border_color="#A84F6C")
-        acc_frame.pack(side=ctk.RIGHT, expand=False)
+        global acc_frame
+
+        acc_frame = ctk.CTkFrame(window_beranda, width=300, height=600, fg_color="#1A1F23")
+        acc_frame.place(x=800, y=200)
         acc_frame.pack_propagate(False)
         acc_frame.lift()
 
-        label_acc_icon = ctk.CTkLabel(acc_frame, width=6, height=6, image=icon_acc, corner_radius=0, bg_color="#1A1F23", 
-                        fg_color="#1A1F23", text="") 
+        label_acc_icon = ctk.CTkLabel(acc_frame, width=6, height=6, image=icon_acc, bg_color="#1A1F23", fg_color="#1A1F23", text="")
         label_acc_icon.pack(pady=20)
 
         label_user = ctk.CTkLabel(acc_frame, text="dimas", fg_color="transparent", text_color="#E3DFE6", font=("Trebuchet MS", 18))
         label_user.pack(pady=20)
 
         # Menambahkan tombol "Buku Saya"
-        button_buku_saya = ctk.CTkButton(acc_frame, text="Buku Saya", fg_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), corner_radius=10)
+        button_buku_saya = ctk.CTkButton(acc_frame, text="Buku Saya", fg_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
         button_buku_saya.pack(pady=20)
+
+
+        
+
+
+##########
 
 
     option_frame = ctk.CTkFrame(window_beranda, fg_color="#1A1F23")
@@ -283,16 +359,13 @@ def setup_home_screen():
     button2_indicate = ctk.CTkLabel(option_frame, width=120, height=1, corner_radius=30, text="", bg_color="#1A1F23", fg_color="#1A1F23")
     button2_indicate.place(relx=0.63, rely=0.4, anchor="center")
 
-    button3 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=0, fg_color="#1A1F23",
-                        text="Buku Saya", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, 
-                        hover_color="#232A30", command=show_kategori)
-    button3.place(relx=0.76, rely=0.055, anchor="center")
-
-    button3_indicate = ctk.CTkLabel(option_frame, width=120, height=1, corner_radius=30, text="", bg_color="#1A1F23", fg_color="#1A1F23")
-    button3_indicate.place(relx=0.88, rely=0.055, anchor="center")
+    button3 = ctk.CTkButton(window_beranda, width=20, height=20, image=icon_search, corner_radius=0, 
+                        bg_color="#9C909D", fg_color="#9C909D", border_width=0, text="", 
+                        hover=False, command=search_button_click)
+    button3.place(relx=0.88, rely=0.055, anchor="center")
 
     button4 = ctk.CTkButton(window_beranda, width=6, height=6, image=icon_acc, corner_radius=0, bg_color="#1A1F23", 
-                            fg_color="#1A1F23", border_width=0, text="", hover=True, hover_color="#232A30", command=sys.exit)
+                            fg_color="#1A1F23", border_width=0, text="", hover=True, hover_color="#232A30", command= toggle_account_frame)
     button4.place(relx=0.95, rely=0.055, anchor="center")
 
     scrollable_frame = ctk.CTkScrollableFrame(main_frame, width=1200, height=500, fg_color="#1A1F23", orientation="horizontal")
@@ -305,6 +378,9 @@ def setup_home_screen():
     category_scrollable_frame.pack(side="top", fill="both", expand=True)
 
     show_beranda()
+
+    
+
     
 window_beranda = ctk.CTk()
 window_beranda.title("Beranda")
