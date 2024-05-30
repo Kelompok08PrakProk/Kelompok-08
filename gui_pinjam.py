@@ -1,44 +1,75 @@
 import os
 from customtkinter import *
 import customtkinter as ctk
-from tkinter import Text
-from PIL import Image, ImageTk
+from tkinter import Text, messagebox
+from PIL import Image
 
-def show_novel_details(novel_image_path, novel_description):
-    try:
-        novel_image = Image.open(novel_image_path)
-        resize_novel_img = novel_image.resize((350, 450))
-        novel_image = ImageTk.PhotoImage(resize_novel_img)
-        
-        novel_img_label = ctk.CTkLabel(window_beranda, image=novel_image, text="", bg_color="transparent", fg_color="transparent")
-        novel_img_label.image = novel_image  
-        novel_img_label.place(relx=0.25, rely=0.5, anchor="center")
-        
-        novel_desc_text = Text(window_beranda, wrap='word', bg='#1A1F23', fg='#E3DFE6', font=("Trebuchet MS", 16), borderwidth=0, highlightthickness=0)
-        novel_desc_text.insert("1.0", novel_description)
-        novel_desc_text.tag_add("justify", "1.0", "end")
-        novel_desc_text.tag_configure("justify", justify="left")
-        novel_desc_text.place(relx=0.51, rely=0.6, anchor="center", width=600, height=400)
-        novel_desc_text.configure(state="disabled")
+# Global variable to keep track of stock
+book_stock = 10
 
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        back_arrow_path = os.path.join(script_dir, "gambar/back_arrow.png")
-        back_arrow = Image.open(back_arrow_path)
-        resize_arrow_img = back_arrow.resize((200, 25))
-        back_arrow = ImageTk.PhotoImage(resize_arrow_img)
-
-        back_button = ctk.CTkButton(window_beranda, image=back_arrow, text="Kembali", width=40, height=40, corner_radius=30, fg_color="transparent" , command=back_to_home)
-        back_button.image = back_arrow  
-        back_button.place(relx=0.05, rely=0.11, anchor="nw")
-
-        stock_button = ctk.CTkButton(window_beranda, text="Stok : 10", width=50, height=25, corner_radius=30, fg_color="#A84F6C", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
-        stock_button.place(relx=0.39, rely=0.7, anchor="center")
+def show_book_details(buku_dipilih):
+    for idx, row in df.iterrows():
+        book_image_path = row['cover']
         
-        borrow_button = ctk.CTkButton(window_beranda, text="PINJAM", width=120, height=35, corner_radius=30, fg_color="transparent", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
-        borrow_button.place(relx=0.4, rely=0.8, anchor="center")
+        if os.path.exists(book_image_path):
+            try:
+                book_img = Image.open(book_image_path)
+                resize_img = novel_image.resize((350, 450))
+                book_image = ImageTk.PhotoImage(resize_img)
+            except Exception as e:
+                print(f"Error loading image {book_image_path}: {e}")
+                book_image = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="red"))
+        else:
+            print(f"Book image not found: {book_image_path}")
+            book_image = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="gray")) 
+    
+    novel_img_label = ctk.CTkLabel(window_beranda, image=book_image, text="")
+    novel_img_label.place(relx=0.25, rely=0.5, anchor="center")
+    
+    book_desc_frame = ctk.CTkFrame(window_beranda, width=600, height=400, bg='#1A1F23', fg='#E3DFE6', font=("Trebuchet MS", 16), border_width=0)
+    book_desc_frame.place(relx=0.51, rely=0.6, anchor="center")
+    
+    label_judul = ctk.CTkLabel(detail_window, text=f"Judul: {buku_dipilih['judul']}", font=("Arial", 12))
+    label_judul.pack()
+    
+    label_genre = ctk.CTkLabel(detail_window, text=f"Genre: {buku_dipilih['genre']}", font=("Arial", 12))
+    label_genre.pack()
+    
+    label_penulis = ctk.CTkLabel(detail_window, text=f"Penulis: {buku_dipilih['penulis']}", font=("Arial", 12))
+    label_penulis.pack()
+    
+    label_tahun = ctk.CTkLabel(detail_window, text=f"Tahun Terbit: {buku_dipilih['tahunTerbit']}", font=("Arial", 12))
+    label_tahun.pack()
+    
+    label_halaman = ctk.CTkLabel(detail_window, text=f"Halaman: {buku_dipilih['halaman']}", font=("Arial", 12))
+    label_halaman.pack()
+    
+    label_sinopsis = ctk.CTkLabel(detail_window, text=f"Sinopsis: {buku_dipilih['sinopsis']}", font=("Arial", 12))
+    label_sinopsis.pack()
+    
+    label_stok = ctk.CTkLabel(detail_window, text=f"Stok: {buku_dipilih['stok']}", font=("Arial", 12))
+    label_stok.pack()
+
+    button_back = ctk.CTkButton(window_beranda, width=100, height=35, corner_radius=0, fg_color="#1A1F23", border_width=0, text="← Kembali", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=False, command=back_to_home)
+    button_back.place(relx=0.08, rely=0.16, anchor="w")
+    
+    global stock_button
+    stock_button = ctk.CTkButton(window_beranda, text=f"Stok : {book_stock}", width=50, height=25, corner_radius=30, fg_color="#A84F6C", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16))
+    stock_button.place(relx=0.39, rely=0.7, anchor="center")
+    
+    borrow_button = ctk.CTkButton(window_beranda, text="PINJAM", width=120, height=35, corner_radius=30, fg_color="transparent", border_width=1, border_color="#A84F6C", text_color="#E3DFE6", font=("Trebuchet MS", 16), command=borrow_book)
+    borrow_button.place(relx=0.4, rely=0.8, anchor="center")
+    
         
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
+def borrow_book():
+    global book_stock
+    if book_stock > 0:
+        book_stock -= 1
+        stock_button.configure(text=f"Stok : {book_stock}")
+        if book_stock == 0:
+            messagebox.showinfo("Info", "Maaf, stok buku habis")
+    else:
+        messagebox.showinfo("Info", "Maaf, stok buku habis")
 
 def back_to_home():
     for widget in window_beranda.winfo_children():
@@ -51,17 +82,21 @@ def setup_home_screen():
     icon_search_path = os.path.join(script_dir, "gambar/search_icon.png")
     icon_acc_path = os.path.join(script_dir, "gambar/account_icon.png")
 
-    logo2 = Image.open(logo2_path)
-    resize_img = logo2.resize((320,117))
-    logo2 = ImageTk.PhotoImage(resize_img)
-    icon_search = Image.open(icon_search_path)
-    resize_img = icon_search.resize((30,30))
-    icon_search = ImageTk.PhotoImage(resize_img)
-    icon_acc = Image.open(icon_acc_path)
-    resize_img = icon_acc.resize((70,70))
-    icon_acc = ImageTk.PhotoImage(resize_img)
+    try:
+        logo2 = Image.open(logo2_path)
+        resize_img = logo2.resize((320,117))
+        logo2 = ctk.CTkImage(resize_img)
+        icon_search = Image.open(icon_search_path)
+        resize_img = icon_search.resize((30,30))
+        icon_search = ctk.CTkImage(resize_img)
+        icon_acc = Image.open(icon_acc_path)
+        resize_img = icon_acc.resize((70,70))
+        icon_acc = ctk.CTkImage(resize_img)
+    except FileNotFoundError as e:
+        messagebox.showerror("File Not Found", f"Error: {e}")
+        return
 
-    l1 = ctk.CTkLabel(window_beranda, image=logo2, text="", bg_color="transparent", fg_color="transparent")
+    l1 = ctk.CTkLabel(window_beranda, image=logo2, text="")
     l1.pack(pady=0, anchor="nw")
 
     button1 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=30, fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="Beranda", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, hover_color="#A84F6C")
@@ -79,14 +114,13 @@ def setup_home_screen():
     button4 = ctk.CTkButton(window_beranda, width=6, height=6, image=icon_acc, corner_radius=0, bg_color="#1A1F23", fg_color="#1A1F23", border_width=0, text="", hover=True, hover_color="#232A30")
     button4.place(relx=0.95, rely=0.055, anchor="center")
 
-    show_novel_details(os.path.join(script_dir, "gambar/cover buku/Novel/1.jpg"), 
-                       "Tahun Terbit: 2017\nJumlah Halaman: 379\n\nSinopsis : Laut Bercerita, novel terbaru Leila S. Chudori, bertutur tentang kisah keluarga yang kehilangan, sekumpulan sahabat yang merasakan kekosongan di dada, sekelompok orang yang gemar menyiksa dan lancar berkhianat, sejumlah keluarga yang mencari kejelasan makam anaknya, dan tentang cinta yang tak akan luntur.")
+    show_book_details(buku_dipilih)
 
 window_beranda = ctk.CTk()
 window_beranda.title("Beranda")
 window_beranda.geometry("1300x800")
 window_beranda.configure(fg_color="#1A1F23")
-window_beranda.resizable(True,True)
+window_beranda.resizable(True, True)
 
 setup_home_screen()
 
