@@ -45,7 +45,7 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
             button_cover.image = cover_photo  # Menyimpan referensi gambar
             button_cover.pack(side="top")
 
-            label_judul = ctk.CTkLabel(frame_buku, text=row['judul'], fg_color="transparent", text_color="#E3DFE6")
+            label_judul = ctk.CTkLabel(frame_buku, text=row['judul'], fg_color="transparent", text_color="#E3DFE6", wraplength=300)
             label_judul.pack(side="top")
     
     except FileNotFoundError:
@@ -61,6 +61,11 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
         # Membaca file CSV ke dalam DataFrame
         df = pd.read_csv(file_path, encoding="windows-1252")
         
+        # Memeriksa apakah kolom 'judul' dan 'cover' ada dalam DataFrame
+        if 'judul' not in df.columns or 'cover' not in df.columns:
+            print("Kolom 'judul' atau 'cover' tidak ditemukan dalam file CSV.")
+            return
+        
         # Filter buku berdasarkan genre
         buku_genre = df[df['genre'].str.lower() == genre.lower()]
         
@@ -68,16 +73,13 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
             print(f"Tidak ada buku dengan genre '{genre}' yang ditemukan.")
             return
         
-        # Load cover buku dari direktori coverbuku
-        cover_dir = os.path.join(script_dir, 'coverbuku')
-        
         # Menghapus widget lama dari scrollable_frame
         for widget in category_scrollable_frame.winfo_children():
             widget.destroy()
         
         # Menampilkan daftar buku berdasarkan genre
         for idx, row in buku_genre.iterrows():
-            cover_path = os.path.join(cover_dir, f"{row['judul']}.jpg")
+            cover_path = row['cover']
             
             if os.path.exists(cover_path):
                 try:
@@ -86,19 +88,19 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
                     cover_photo = ImageTk.PhotoImage(cover_image)
                 except Exception as e:
                     print(f"Error loading image {cover_path}: {e}")
-                    cover_photo = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="red"))  # Tampilkan placeholder merah jika ada error
+                    cover_photo = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="red"))  # Placeholder merah jika error
             else:
                 print(f"Cover image not found: {cover_path}")
-                cover_photo = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="gray"))  # Placeholder abu-abu jika gambar tidak ditemukan
+                cover_photo = ImageTk.PhotoImage(Image.new("RGB", (300, 450), color="gray"))  # Placeholder abu-abu jika tidak ditemukan
 
             frame_buku = ctk.CTkFrame(category_scrollable_frame, width=360, height=600, fg_color="#1A1F23")
             frame_buku.pack(side="left", padx=10, pady=10)
 
-            label_cover = ctk.CTkLabel(frame_buku, image=cover_photo, text="", fg_color="transparent")
-            label_cover.image = cover_photo  # Menyimpan referensi gambar
-            label_cover.pack(side="top")
+            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", command=lambda buku=row: tampilkan_detail_buku(buku))
+            button_cover.image = cover_photo  # Menyimpan referensi gambar
+            button_cover.pack(side="top")
 
-            label_judul = ctk.CTkLabel(frame_buku, text=row['judul'], fg_color="transparent", text_color="#E3DFE6")
+            label_judul = ctk.CTkLabel(frame_buku, text=row['judul'], fg_color="transparent", text_color="#E3DFE6", wraplength=300)
             label_judul.pack(side="top")
     
     except FileNotFoundError:
@@ -199,11 +201,23 @@ def setup_home_screen():
         indicate(button2_indicate)
         main_frame.pack_forget()
         category_frame.pack(side=ctk.TOP, fill="both", expand=True)
+        
         for widget in category_frame.winfo_children():
             widget.destroy()
-        option_menu = ctk.CTkOptionMenu(category_frame, values=["Novel", "Cerpen", "Biografi", "Komik", "Ensiklopedia", "Kamus", "Majalah"], 
-                                        width=170, height=26, fg_color="#A6A4A8", button_color="#A6A4A8", button_hover_color="#E3DFE6",
-                                        text_color="#1A1F23", corner_radius=30, command=lambda genre: tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre))
+        
+        # Create the scrollable frame for displaying books
+        global category_scrollable_frame
+        category_scrollable_frame = ctk.CTkScrollableFrame(category_frame)
+        category_scrollable_frame.pack(side=ctk.TOP, fill="both", expand=True)
+        
+        option_menu = ctk.CTkOptionMenu(
+            category_frame, 
+            values=["Novel", "Cerpen", "Biografi", "Komik", "Ensiklopedia", "Kamus", "Majalah"], 
+            width=170, height=26, fg_color="#A6A4A8", 
+            button_color="#A6A4A8", button_hover_color="#E3DFE6",
+            text_color="#1A1F23", corner_radius=30, 
+            command=lambda genre: tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre)
+        )
         option_menu.place(relx=0.1, rely=0.02, anchor="n")
 
     # Fungsi untuk menampilkan frame akun
@@ -283,7 +297,7 @@ def setup_home_screen():
     search_results_frame = ctk.CTkFrame(search_results_mainframe, width=1300, height=600, fg_color="#1A1F23")
     scrollable_frame.pack(side="top", fill="both", expand=True)
 
-    category_scrollable_frame = ctk.CTkScrollableFrame(category_frame, width=1200, height=500, fg_color="#1A1F23", orientation="horizontal")
+    category_scrollable_frame = ctk.CTkScrollableFrame(category_frame, width=1200, height=500, fg_color="#1A1F23", orientation="vertical")
     category_scrollable_frame.pack(side="top", fill="both", expand=True)
 
     show_beranda()
