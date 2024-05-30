@@ -1,13 +1,16 @@
 import customtkinter as ctk
-from PIL import Image, ImageTk
-import os
-from tkcalendar import Calendar
-from datetime import datetime, timedelta
 import qrcode
 import random
+import webbrowser
+import os
+import csv
+import string
+from PIL import Image, ImageTk
+from tkcalendar import Calendar
+from datetime import datetime, timedelta
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, inch
-
+from reportlab.lib.pagesizes import landscape, A5, inch
+from reportlab.lib.utils import ImageReader
 
 def kembali():
     # Contoh tindakan ketika tombol kembali ditekan
@@ -39,7 +42,7 @@ def show_calendar(button):
 
     # Angkat jendela kalender ke depan
     calendar_window.lift()
-    # Jadikan jendela kalender sebagai jendela utama sementara
+    # Jadikan jendela kalender sebagai jendela utama sementarat
     calendar_window.grab_set()
 
 def get_date():
@@ -55,28 +58,39 @@ def pinjam_buku(book_info):
     print(f"Buku '{book_info['title']}' dipinjam!")
     # Tambahkan logika peminjaman buku di sini
 
-def read_user_data(user_email):
-    # Fungsi ini harus mengakses database dan mengambil nama lengkap pengguna berdasarkan email
-    # Untuk contoh ini, kita akan mengembalikan nama statis
-    return "Nama Pengguna"
+email = "dimasadira45@gmail.com"
 
-def generate_random_code():
-    return ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=10))
+def generate_random_code(length=10):
+    """Menghasilkan kode random dari huruf dan angka."""
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
 
 def generate_qr_code(data, filename):
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(data)
-    qr.make(fit=True)
-    img = qr.make_image(fill='black', back_color='white')
+    """Membuat dan menyimpan QR Code dari data yang diberikan."""
+    img = qrcode.make(data)
     img.save(filename)
+
+def read_user_data(email):
+    """Membaca data pengguna dari databaseUser.csv berdasarkan email."""
+    with open('database/databaseUser.csv', mode='r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['email'] == email:
+                return row['namalengkap']
+    return None
 
 def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam, tanggal_kembali):
     """Membuat tiket peminjaman buku dalam bentuk PDF."""
+    # Mendefinisikan jenis font dan ukuran font untuk teks
+    font_styles = {
+        "title": ("Times-Italic", 25),
+        "normal": ("Helvetica", 17),
+        "italic": ("Times-Italic", 17),
+        "bold": ("Times-Bold", 12),
+        "book": ("Times-Bold", 20),
+        "bottom":("Times-Italic", 15)
+    }
+
     # Membaca nama lengkap pengguna dari database
     nama_lengkap = read_user_data(user_email)
     if not nama_lengkap:
@@ -85,47 +99,85 @@ def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam,
     
     # Menghasilkan kode random dan QR code
     random_code = generate_random_code()
-    qr_filename = f"{random_code}.png"
+    qr_filename = f"tiket/{random_code}.png"  
     generate_qr_code(random_code, qr_filename)
     
-    # Membuat PDF
-    pdf_filename = f"tiket_peminjaman_{random_code}.pdf"
-    c = canvas.Canvas(pdf_filename, pagesize=(500,300))
-    width, height = (500,300)
+    # Membuat PDF dengan ukuran A5 landscape
+    pdf_filename = f"tiket/tiket_peminjaman_{random_code}.pdf"  
+    c = canvas.Canvas(pdf_filename, pagesize=landscape(A5))
+    width, height = landscape(A5)
 
-    # Menambahkan teks ke PDF
-    c.drawString(100, 750, f"Tiket Peminjaman Buku")
-    c.drawString(100, 735, f"Nama Lengkap: {nama_lengkap}")
-    c.drawString(100, 720, f"Judul Buku: {buku_dipilih}")
-    c.drawString(100, 705, f"Genre: {genre}")
-    c.drawString(100, 690, f"Penulis: {penulis}")
-    c.drawString(100, 675, f"Tanggal Peminjaman: {tanggal_pinjam}")
-    c.drawString(100, 660, f"Tanggal Pengembalian: {tanggal_kembali}")
-    c.drawString(100, 645, f"Kode Tiket: {random_code}")
+    # Mengatur warna latar belakang canvas menjadi hitam
+    c.setFillColorRGB(0, 0, 0)
+    c.rect(0, 0, width, height, fill=1)
 
-    #Garis batas atas
-    c.setStrokeColorRGB(0.5,0.3,0.1)
+    # Garis batas atas
+    c.setStrokeColorRGB(0.5, 0.3, 0.1)
     c.setLineWidth(3)
-    c.line(40,225,370,225)
-    #Garis batas bawah
-    c.setStrokeColorRGB(0.5,0.3,0.1)
+    c.line(20, 295, 425, 295)
+    # Garis batas bawah
+    c.setStrokeColorRGB(0.5, 0.3, 0.1)
     c.setLineWidth(1.5)
-    c.line(40,125,370,125)
-    # Menambahkan QR code ke PDF
-    c.drawImage(qr_filename, 380, 185, width=1.5*inch, height=1.5*inch)
+    c.line(20, 125, 425, 125)
+
+    # Menambahkan logo perusahaan ke PDF dan mengubah ukurannya
+    logo_path = "gambar/logo2.png"
+    logo_width = 300  # Ukuran lebar logo dalam pixel
+    logo_height = 100  # Ukuran tinggi logo dalam pixel
+    logo_x = 20  # Koordinat x untuk pojok kiri atas
+    logo_y = height - logo_height - 20  # Koordinat y untuk pojok kiri atas
+    c.drawImage(logo_path, logo_x, logo_y, width=logo_width, height=logo_height)
+    
+    # Menambahkan teks ke PDF dengan jenis font, ukuran font, dan posisi yang berbeda
+    title_font_name, title_font_size = font_styles["title"]
+    title_text = "Tiket Peminjaman Buku"
+    title_text_width = c.stringWidth(title_text, title_font_name, title_font_size)
+    title_x = width - 500  # Posisi x untuk title
+    title_y = height - 150  # Posisi y untuk title
+
+    texts = [
+        (title_text, "title", title_x, title_y),  # Tengah atas
+        (f"{nama_lengkap}", "normal", 20, height - 200),  # Posisi yang ditentukan
+        (f"{buku_dipilih}", "book", 20, height - 260),
+        (f"{genre}", "bold", 20, height - 240),
+        (f"{penulis}", "italic", 20, height - 280),
+        (f"Tanggal Peminjaman   : {tanggal_pinjam}", "bottom", 20, height - 340),
+        (f"Tanggal Pengembalian : {tanggal_kembali}", "bottom", 20, height - 370),
+        (f"Kode Tiket : {random_code}", "bottom", 20, height - 400)
+    ]
+
+    # Draw each text with specified font style, position, and size
+    for text, style, x, y in texts:
+        font_name, font_size = font_styles[style]
+        c.setFont(font_name, font_size)
+        c.setFillColorRGB(1, 1, 1)  # Mengatur warna teks menjadi putih
+        c.drawString(x, y, text)
+
+    # Menambahkan QR code ke PDF di pojok kanan atas
+    qr_width = 100  # Ukuran lebar QR code dalam pixel
+    qr_height = 100  # Ukuran tinggi QR code dalam pixel
+    qr_x = width - qr_width - 50  # Koordinat x untuk pojok kanan atas
+    qr_y = height - qr_height - 20  # Koordinat y untuk pojok kanan atas
+    c.drawImage(qr_filename, qr_x, qr_y, width=qr_width, height=qr_height)
+
+    # Hitung koordinat untuk garis
+    x_start = 100  # Ujung kiri kertas A5
+    y_start = A5[1] * 3/4  # 3/4 bagian dari atas kertas A5
+    x_end = A5[0] - 100  # Ujung kanan kertas A5
+    y_end = A5[1] * 3/4  # 3/4 bagian dari atas kertas A5
+
+    # Set warna garis menjadi putih (RGB: 1, 1, 1)
+    c.setStrokeColorRGB(1, 1, 1)
+
+    # Gambar garis pada canvas dengan warna putih
+    c.line(x_start, y_start, x_end, y_end)
     
     # Menyelesaikan PDF
     c.showPage()
     c.save()
     
     print(f"Tiket peminjaman telah disimpan sebagai {pdf_filename}")
-
-# Data buku
-books = [
-    {"title": "Laut Bercerita", "cover_path": "gambar/cover buku/Novel/1.jpg"},
-    {"title": "Buku Kedua", "cover_path": "gambar/cover buku/Novel/2.jpg"},
-    # Tambahkan buku lain di sini
-]
+    webbrowser.open_new(f"file://{os.path.abspath(pdf_filename)}")
 
 # Membuat jendela utama
 window_beranda = ctk.CTk()
@@ -139,21 +191,24 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 logo2_path = os.path.join(script_dir, "gambar/logo2.png")
 icon_search_path = os.path.join(script_dir, "gambar/search_icon.png")
 icon_acc_path = os.path.join(script_dir, "gambar/account_icon.png")
-cover_buku_path = os.path.join(script_dir, "gambar/cover buku/Novel/1.jpg")  # Path ke gambar sampul buku
+cover_buku_path = os.path.join(script_dir, "gambar/cover buku/31.png")  # Path ke gambar sampul buku
 background_cover_path = os.path.join(script_dir, "gambar/Background/Novel/Laut Bercerita.jpg")
 
 # Memuat dan mengubah ukuran gambar logo
 
 # Memuat gambar sampul buku
 cover_buku = ctk.CTkImage(light_image=Image.open(cover_buku_path), size=(250, 350))
-
+logo2 = ctk.CTkImage(light_image=Image.open(logo2_path), size=(200, 100))
+background_cover = ctk.CTkImage(light_image=Image.open(background_cover_path), size=(3000, 200))
+icon_search = ctk.CTkImage(light_image=Image.open(icon_search_path), size=(15, 8))
+icon_acc = ctk.CTkImage(light_image=Image.open(icon_acc_path), size=(50, 50))
 # Membuat label untuk logo
 l1 = ctk.CTkLabel(window_beranda, image=logo2, text="", bg_color="transparent", fg_color="transparent")
 l1.pack(pady=0, anchor="nw")
 
 # Background covernya
 background_cover = ctk.CTkLabel(window_beranda, image=background_cover, text="", bg_color="transparent", fg_color="transparent")
-background_cover.place(relx=0.5, rely=0.36, anchor="center")
+background_cover.place(relx=0, rely=0.25, anchor="center")
 
 # Membuat tombol "Beranda"
 button1 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=30, fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="Beranda", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, hover_color="#A84F6C")
@@ -168,7 +223,7 @@ entry1 = ctk.CTkEntry(window_beranda, width=220, height=35, corner_radius=30, fg
 entry1.place(relx=0.81, rely=0.055, anchor="center")
 
 # Membuat tombol pencarian
-button3 = ctk.CTkButton(window_beranda, width=30, height=30, image=icon_search, corner_radius=0, bg_color="#9C909D", fg_color="#9C909D", border_width=0, text="", hover=False)
+button3 = ctk.CTkButton(window_beranda, width=30, height=20, image=icon_search, corner_radius=0, bg_color="#9C909D", fg_color="#9C909D", border_width=0, text="", hover=False)
 button3.place(relx=0.867, rely=0.055, anchor="center")
 
 # Membuat tombol akun
@@ -210,7 +265,7 @@ label_tanggal_kembali = ctk.CTkLabel(window_beranda, text="", font=("Trebuchet M
 label_tanggal_kembali.place(relx=0.6, rely=0.55, anchor="center")
 
 def cetak_tiket():
-    user_email = "user@example.com"  # Ganti dengan email pengguna yang sebenarnya
+    user_email = "dimasadira45@gmail.com"  # Ganti dengan email pengguna yang sebenarnya
     buku_dipilih = judul_buku_label.cget("text")
     genre = "Novel"  # Ganti dengan genre yang sesuai
     penulis = "Penulis Buku"  # Ganti dengan nama penulis yang sesuai
