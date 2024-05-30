@@ -90,8 +90,8 @@ def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam,
     
     # Membuat PDF
     pdf_filename = f"tiket_peminjaman_{random_code}.pdf"
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
-    width, height = letter
+    c = canvas.Canvas(pdf_filename, pagesize=(500,300))
+    width, height = (500,300)
 
     # Menambahkan teks ke PDF
     c.drawString(100, 750, f"Tiket Peminjaman Buku")
@@ -103,8 +103,16 @@ def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam,
     c.drawString(100, 660, f"Tanggal Pengembalian: {tanggal_kembali}")
     c.drawString(100, 645, f"Kode Tiket: {random_code}")
 
+    #Garis batas atas
+    c.setStrokeColorRGB(0.5,0.3,0.1)
+    c.setLineWidth(3)
+    c.line(40,225,370,225)
+    #Garis batas bawah
+    c.setStrokeColorRGB(0.5,0.3,0.1)
+    c.setLineWidth(1.5)
+    c.line(40,125,370,125)
     # Menambahkan QR code ke PDF
-    c.drawImage(qr_filename, 100, 500, width=1.5*inch, height=1.5*inch)
+    c.drawImage(qr_filename, 380, 185, width=1.5*inch, height=1.5*inch)
     
     # Menyelesaikan PDF
     c.showPage()
@@ -135,11 +143,6 @@ cover_buku_path = os.path.join(script_dir, "gambar/cover buku/Novel/1.jpg")  # P
 background_cover_path = os.path.join(script_dir, "gambar/Background/Novel/Laut Bercerita.jpg")
 
 # Memuat dan mengubah ukuran gambar logo
-logo2 = ctk.CTkImage(light_image=Image.open(logo2_path), size=(320, 117))
-icon_search = ctk.CTkImage(light_image=Image.open(icon_search_path), size=(20, 20))
-icon_acc = ctk.CTkImage(light_image=Image.open(icon_acc_path), size=(70, 70))
-cover_buku = ctk.CTkImage(light_image=Image.open(cover_buku_path), size=(200, 300))
-background_cover= ctk.CTkImage(light_image=Image.open(background_cover_path), size=(1850,200))
 
 # Memuat gambar sampul buku
 cover_buku = ctk.CTkImage(light_image=Image.open(cover_buku_path), size=(250, 350))
