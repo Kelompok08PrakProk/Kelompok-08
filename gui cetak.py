@@ -3,6 +3,7 @@ import string
 import qrcode
 import csv
 import os
+import webbrowser
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, A5, inch
 
@@ -36,8 +37,32 @@ def read_book_cover(buku_dipilih):
                 return row['cover']
     return None
 
+def save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali, pdf_filename):
+    """Menyimpan informasi tiket peminjaman ke database datapinjam.csv."""
+    fieldnames = ['email', 'judul', 'tanggalPinjam', 'tanggalKembali', 'tiket']
+    new_entry = {
+        'email': user_email,
+        'judul': buku_dipilih,
+        'tanggalPinjam': tanggal_pinjam,
+        'tanggalKembali': tanggal_kembali,
+        'tiket': pdf_filename
+    }
+
+    # Membaca data dari file datapinjam.csv
+    if not os.path.exists('database/datapinjam.csv'):
+        # Jika file belum ada, buat file baru dengan header
+        with open('database/datapinjam.csv', mode='w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerow(new_entry)
+    else:
+        # Jika file sudah ada, tambahkan entri baru
+        with open('database/datapinjam.csv', mode='a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writerow(new_entry)
+
 def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam, tanggal_kembali):
-    """Membuat tiket peminjaman buku dalam bentuk PDF."""
+    """Membuat tiket peminjaman buku dalam bentuk PDF dan menyimpannya ke database."""
     # Mendefinisikan jenis font dan ukuran font untuk teks
     font_styles = {
         "title": ("Times-Italic", 25),
@@ -147,6 +172,10 @@ def create_loan_ticket(user_email, buku_dipilih, genre, penulis, tanggal_pinjam,
     c.save()
     
     print(f"Tiket peminjaman telah disimpan sebagai {pdf_filename}")
+    webbrowser.open_new(f"file://{os.path.abspath(pdf_filename)}")
+
+    # Menyimpan informasi tiket ke database
+    save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali, pdf_filename)
 
 # Uji fungsi create_loan_ticket
 create_loan_ticket(email, "Laut Bercerita", "Fantasy", "J.K. Rowling", "2024-05-30", "2024-06-30")
