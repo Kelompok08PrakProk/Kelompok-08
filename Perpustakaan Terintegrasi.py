@@ -82,6 +82,29 @@ def read_book_details(buku_dipilih):
     return genre, penulis
 
 def save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali):
+    # Fungsi untuk membaca data buku dari CSV
+    def baca_data_buku():
+        try:
+            return pd.read_csv('database/databuku.csv').to_dict('records')
+        except FileNotFoundError:
+            return []
+
+    # Fungsi untuk menyimpan data buku ke CSV
+    def simpan_data_buku(data_buku):
+        df = pd.DataFrame(data_buku)
+        df.to_csv('database/databuku.csv', index=False)
+    
+    data_buku = baca_data_buku()
+
+    # Kurangi stok buku yang dipilih dengan 1
+    for buku in data_buku:
+        if buku["judul"] == buku_dipilih["judul"]:
+            buku["stok"] = int(buku["stok"]) - 1
+            break
+
+    # Simpan data buku yang telah diperbarui ke dalam file databuku.csv
+    simpan_data_buku(data_buku)
+    
     global pdf_filename
     """Menyimpan informasi tiket peminjaman ke database datapinjam.csv."""
     pdf_filename = create_loan_ticket(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali)
@@ -564,17 +587,7 @@ def halaman_login():
 if __name__ == "__main__":
     halaman_login()
 
-# Fungsi untuk membaca data buku dari CSV
-def baca_data_buku():
-    try:
-        return pd.read_csv('database/databuku.csv').to_dict('records')
-    except FileNotFoundError:
-        return []
 
-# Fungsi untuk menyimpan data buku ke CSV
-def simpan_data_buku(data_buku):
-    df = pd.DataFrame(data_buku)
-    df.to_csv('database/databuku.csv', index=False)
 
 # Fungsi untuk membaca data pinjaman dari CSV
 def baca_data_pinjam():
