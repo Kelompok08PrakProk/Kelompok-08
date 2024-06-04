@@ -81,6 +81,16 @@ def read_book_details(buku_dipilih):
 
     return genre, penulis
 
+def simpan_data_buku(data_buku):
+    df = pd.DataFrame(data_buku)
+    df.to_csv('database/databuku.csv', index=False)
+
+def baca_data_buku():
+    try:
+        return pd.read_csv('database/databuku.csv').to_dict('records')
+    except FileNotFoundError:
+        return []
+
 def save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali):
     # Fungsi untuk membaca data buku dari CSV
     def baca_data_buku():
@@ -289,7 +299,7 @@ def halaman_login():
     frame.place(relx=0.5, rely=0.5, anchor="center")
 
     l2 = ctk.CTkLabel(window, image=logo_img, text="", bg_color="white", fg_color="transparent")
-    l2.place(relx=0.5, rely=0.23, anchor="center")
+    l2.place(relx=0.5, rely=0.28, anchor="center")
 
     l3 = ctk.CTkLabel(frame, text="Login", text_color="#1A1F23", font=('Trebuchet MS', 40))
     l3.place(relx=0.5, rely=0.28, anchor="center")
@@ -331,16 +341,16 @@ def halaman_login():
         frame.place(relx=0.5, rely=0.5, anchor="center")
 
         l2 = ctk.CTkLabel(window2, image=logo_img, text="", bg_color="white", fg_color="transparent")
-        l2.place(relx=0.5, rely=0.22, anchor="center")
+        l2.place(relx=0.5, rely=0.28, anchor="center")
 
         l3 = ctk.CTkLabel(frame, text="Register", text_color="#1A1F23", font=('Trebuchet MS', 50))
-        l3.place(relx=0.5, rely=0.27, anchor="center")
+        l3.place(relx=0.5, rely=0.28, anchor="center")
 
         entry_nama_lengkap = ctk.CTkEntry(frame, width=547, height=27, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", text_color="#242C32", placeholder_text="Nama Lengkap", font=('Trebuchet MS', 16), placeholder_text_color="#A6A4A8")
-        entry_nama_lengkap.place(relx=0.5, rely=0.36, anchor="center")
+        entry_nama_lengkap.place(relx=0.5, rely=0.38, anchor="center")
 
         entry_alamat = ctk.CTkEntry(frame, width=547, height=27, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", text_color="#242C32", placeholder_text="Alamat", font=('Trebuchet MS', 16), placeholder_text_color="#A6A4A8")
-        entry_alamat.place(relx=0.5, rely=0.44, anchor="center")
+        entry_alamat.place(relx=0.5, rely=0.45, anchor="center")
 
         entry_nomor_hp = ctk.CTkEntry(frame, width=547, height=27, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", text_color="#242C32", placeholder_text="No. HP", font=('Trebuchet MS', 16), placeholder_text_color="#A6A4A8")
         entry_nomor_hp.place(relx=0.5, rely=0.52, anchor="center")
@@ -354,7 +364,7 @@ def halaman_login():
         entry_password = ctk.CTkEntry(frame, width=200, height=27, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", text_color="#242C32", placeholder_text="Password", font=('Trebuchet MS', 16), placeholder_text_color="#A6A4A8", show="*")
         entry_password.place(relx=0.732, rely=0.62, anchor="center")
 
-        error_pw_regis = ctk.CTkLabel(frame, text="", text_color="red", font=('Trebuchet MS', 8))
+        error_pw_regis = ctk.CTkLabel(frame, text="", text_color="red", font=('Trebuchet MS', 10))
         error_pw_regis.place(relx=0.772, rely=0.725, anchor="e")
 
         entry_konfirmasi_password = ctk.CTkEntry(frame, width=200, height=27, corner_radius=30, fg_color="White", border_width=2, border_color="#E3DFE6", text_color="#242C32", placeholder_text="Konfirmasi Password", font=('Trebuchet MS', 16), placeholder_text_color="#A6A4A8", show="*")
@@ -530,7 +540,7 @@ def halaman_login():
 
     def send_due_date_reminders():
         try:
-            reminder_date = datetime.date.today() + datetime.timedelta(days=3)
+            reminder_date = datetime.today().date() + timedelta(days=3)
             
             with open('database/datapinjam.csv', mode='r') as file:
                 reader = csv.DictReader(file)
@@ -543,7 +553,7 @@ def halaman_login():
                     
                     # Pastikan tanggal pengembalian tidak None dan sesuai format
                     if due_date_str and '-' in due_date_str:
-                        due_date = datetime.datetime.strptime(due_date_str, "%Y-%m-%d").date()
+                        due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
                         
                         if due_date == reminder_date and ticket_path:
                             formatted_due_date = due_date.strftime("%Y-%m-%d")
@@ -573,7 +583,7 @@ def halaman_login():
             error_login.configure(text="Email atau password tidak sesuai")
             return None  # Mengembalikan None jika login gagal
             
-    button1 = ctk.CTkButton(frame, width=300, height=35, corner_radius=30, fg_color="#A84F6C", border_width=0, text="Login", text_color="White", font=("Trebuchet MS", 16), hover=True, hover_color="#66273B",  command=login_user)
+    button1 = ctk.CTkButton(frame, width=300, height=35, corner_radius=30, fg_color="#A84F6C", border_width=0, text="Login", text_color="White", font=("Trebuchet MS", 20), hover=True, hover_color="#66273B",  command=login_user)
     button1.place(relx=0.5, rely=0.65, anchor="center")
 
     button2 = ctk.CTkButton(frame, width=35, height=35, fg_color="transparent", border_width=0, text="Daftar", text_color="#A84F6C", font=("Trebuchet MS", 12), hover=False, command=halaman_register)
@@ -783,7 +793,7 @@ def tampilkan_peminjaman_buku(buku_dipilih, df):
                                     hover=False, command=pinjam_kembali)
         button_back.place(relx=0.1, rely=0.1, anchor="e")
 
-        button_cetak = ctk.CTkButton(peminjaman_buku_frame, width=200, height=50, corner_radius=10, 
+        button_cetak = ctk.CTkButton(peminjaman_buku_frame, width=200, height=50, corner_radius=30, 
                                      fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="CETAK", 
                                      text_color="#E3DFE6", font=("Trebuchet MS", 20), hover=True, hover_color="#A84F6C", command=lambda : save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali))
         button_cetak.place(relx=0.3, rely=0.8, anchor="center")
@@ -840,7 +850,7 @@ def tampilkan_detail_buku(buku_dipilih, df):
         
         book_desc_frame = ctk.CTkFrame(detail_buku_frame, width=400, height=400, bg_color="#1A1F23", 
                                        fg_color="#1A1F23")
-        book_desc_frame.place(relx=0.58, rely=0.7  , anchor="center")
+        book_desc_frame.place(relx=0.58, rely=0.6 , anchor="center")
 
         label_genre = ctk.CTkLabel(book_desc_frame, text=f"Genre: {buku_dipilih['genre']}", font=("Trebuchet MS", 16))
         label_genre.pack(side="top", anchor="w", pady=1, padx=10)
@@ -913,7 +923,7 @@ def tampilkan_daftar_buku(scrollable_frame, file_path='database/databuku.csv'):
             frame_buku.pack(side="left", padx=10, pady=10)
 
             # Change label_cover to a button
-            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", 
+            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", hover=True, hover_color="#E3DFE6",
                                          command=lambda buku=row: tampilkan_detail_buku(buku, df))
             button_cover.image = cover_photo  # Menyimpan referensi gambar
             button_cover.pack(side="top")
@@ -970,7 +980,7 @@ def tampilkan_buku_berdasarkan_genre(category_scrollable_frame, genre, file_path
             frame_buku = ctk.CTkFrame(category_scrollable_frame, width=360, height=600, fg_color="#1A1F23")
             frame_buku.pack(side="left", padx=10, pady=10)
 
-            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", 
+            button_cover = ctk.CTkButton(frame_buku, image=cover_photo, text="", fg_color="transparent", hover=True, hover_color="#E3DFE6",
                                          command=lambda buku=row: tampilkan_detail_buku(buku, df))
             button_cover.image = cover_photo  # Menyimpan referensi gambar
             button_cover.pack(side="top")
@@ -1075,7 +1085,7 @@ def setup_home_screen():
 
     button1_indicate = ctk.CTkLabel(option_frame, width=120, height=1, corner_radius=30, text="", bg_color="#1A1F23", 
                                     fg_color="#1A1F23")
-    button1_indicate.place(relx=0.5, rely=0.45, anchor="center")
+    button1_indicate.place(relx=0.5, rely=0.52, anchor="center")
 
     button2 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=0, fg_color="#1A1F23", 
                             text="Kategori", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, 
@@ -1084,7 +1094,7 @@ def setup_home_screen():
 
     button2_indicate = ctk.CTkLabel(option_frame, width=120, height=1, corner_radius=30, text="", bg_color="#1A1F23", 
                                     fg_color="#1A1F23")
-    button2_indicate.place(relx=0.63, rely=0.45, anchor="center")
+    button2_indicate.place(relx=0.654, rely=0.52, anchor="center")
 
     button3 = ctk.CTkButton(window_beranda, width=120, height=35, corner_radius=0, fg_color="#1A1F23", 
                             text="Buku Saya", text_color="#E3DFE6", font=("Trebuchet MS", 16), hover=True, 
@@ -1093,7 +1103,7 @@ def setup_home_screen():
 
     button3_indicate = ctk.CTkLabel(option_frame, width=120, height=1, corner_radius=30, text="", bg_color="#1A1F23", 
                                     fg_color="#1A1F23")
-    button3_indicate.place(relx=0.76, rely=0.45, anchor="center")
+    button3_indicate.place(relx=0.8075, rely=0.52, anchor="center")
 
     button4 = ctk.CTkButton(window_beranda, width=6, height=6, image=logout, corner_radius=0, bg_color="#1A1F23", 
                             fg_color="#1A1F23", border_width=0, text="", hover=True, hover_color="#232A30", command=sys.exit)
