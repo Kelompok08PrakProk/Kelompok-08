@@ -24,6 +24,7 @@ peminjaman_buku_frame = None
 user_email = None
 tanggal_pinjam = None
 tanggal_kembali = None
+pdf_filename = None
 
 def generate_random_code(length=10):
     """Menghasilkan kode random dari huruf dan angka."""
@@ -80,7 +81,8 @@ def read_book_details(buku_dipilih):
 
     return genre, penulis
 
-def save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali, pdf_filename):
+def save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali):
+    global pdf_filename
     """Menyimpan informasi tiket peminjaman ke database datapinjam.csv."""
     pdf_filename = create_loan_ticket(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali)
     fieldnames = ['email', 'judul', 'tanggalPinjam', 'tanggalKembali', 'tiket']
@@ -768,10 +770,9 @@ def tampilkan_peminjaman_buku(buku_dipilih, df):
                                     hover=False, command=pinjam_kembali)
         button_back.place(relx=0.1, rely=0.1, anchor="e")
 
-        pdf_filename = create_loan_ticket(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali)
         button_cetak = ctk.CTkButton(peminjaman_buku_frame, width=200, height=50, corner_radius=10, 
                                      fg_color="#1A1F23", border_width=1, border_color="#A84F6C", text="CETAK", 
-                                     text_color="#E3DFE6", font=("Trebuchet MS", 20), hover=True, hover_color="#A84F6C", command=lambda : save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali, pdf_filename))
+                                     text_color="#E3DFE6", font=("Trebuchet MS", 20), hover=True, hover_color="#A84F6C", command=lambda : save_loan_ticket_to_database(user_email, buku_dipilih, tanggal_pinjam, tanggal_kembali))
         button_cetak.place(relx=0.3, rely=0.8, anchor="center")
 
     except FileNotFoundError as e:
